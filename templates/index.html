@@ -217,8 +217,8 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
       <p>Social Anxiety Reset · 10 sessions</p>
     </div>
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchTab('login')">Sign in</button>
-      <button class="auth-tab" onclick="switchTab('register')">Create account</button>
+      <button class="auth-tab active" onclick="switchTab('login', this)">Sign in</button>
+      <button class="auth-tab" onclick="switchTab('register', this)">Create account</button>
     </div>
     <div id="auth-error" class="auth-error"></div>
     <div id="form-login" class="auth-form active">
@@ -417,11 +417,11 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 </div>
 
 <div class="bottom-nav" style="display:none;">
-  <button class="nav-btn active" onclick="switchNav('home')"><span class="ni">🏠</span><span class="nl">Home</span></button>
-  <button class="nav-btn" onclick="switchNav('scotty')"><span class="ni">🤖</span><span class="nl">Scotty</span></button>
-  <button class="nav-btn" onclick="switchNav('notes')"><span class="ni">📝</span><span class="nl">Notes</span></button>
-  <button class="nav-btn" onclick="switchNav('tea')"><span class="ni">🫖</span><span class="nl">Tea</span></button>
-  <button class="nav-btn" onclick="switchNav('space')"><span class="ni">🏡</span><span class="nl">My Space</span></button>
+  <button class="nav-btn active" onclick="switchNav('home', this)"><span class="ni">🏠</span><span class="nl">Home</span></button>
+  <button class="nav-btn" onclick="switchNav('scotty', this)"><span class="ni">🤖</span><span class="nl">Scotty</span></button>
+  <button class="nav-btn" onclick="switchNav('notes', this)"><span class="ni">📝</span><span class="nl">Notes</span></button>
+  <button class="nav-btn" onclick="switchNav('tea', this)"><span class="ni">🫖</span><span class="nl">Tea</span></button>
+  <button class="nav-btn" onclick="switchNav('space', this)"><span class="ni">🏡</span><span class="nl">My Space</span></button>
 </div>
 
 <div id="overlay" class="overlay">
@@ -470,11 +470,12 @@ function showScreen(name) {
   }
 }
 
-function switchTab(tab) {
+function switchTab(tab, el) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  event.target.classList.add('active');
+  el.classList.add('active');
   document.getElementById('form-' + tab).classList.add('active');
+  document.getElementById('auth-error').style.display = 'none';
 }
 
 async function doLogin() {
@@ -583,10 +584,10 @@ function showPanel(name) {
   if (name === 'tea') loadTea();
 }
 
-function switchNav(name) {
+function switchNav(name, el) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  event.target.closest('.nav-btn').classList.add('active');
-  
+  (el ? el.closest('.nav-btn') || el : document.querySelector('.nav-btn')).classList.add('active');
+
   if (name === 'scotty') showPanel('scotty');
   else if (name === 'notes') showPanel('notes');
   else if (name === 'tea') showPanel('tea');
