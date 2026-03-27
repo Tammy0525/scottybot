@@ -416,7 +416,7 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
   </div>
 </div>
 
-<div class="bottom-nav">
+<div class="bottom-nav" style="display:none;">
   <button class="nav-btn active" onclick="switchNav('home')"><span class="ni">🏠</span><span class="nl">Home</span></button>
   <button class="nav-btn" onclick="switchNav('scotty')"><span class="ni">🤖</span><span class="nl">Scotty</span></button>
   <button class="nav-btn" onclick="switchNav('notes')"><span class="ni">📝</span><span class="nl">Notes</span></button>
@@ -490,8 +490,15 @@ async function doLogin() {
   });
   
   if (res.ok) {
-    currentUser = (await res.json()).user;
-    showScreen('onboard');
+    const data = await res.json();
+    currentUser = data.user;
+    currentSession = currentUser.current_session || 1;
+    if (currentUser.onboarded) {
+      showScreen('dashboard');
+      loadDashboard();
+    } else {
+      showScreen('onboard');
+    }
   } else {
     err.innerText = "Hmm, that didn't work. Try again?";
     err.style.display = 'block';
@@ -566,7 +573,8 @@ async function finishOnboarding() {
 
 function showPanel(name) {
   if (name === 'scotty') {
-    document.getElementById('msg-input').focus();
+    const inp = document.getElementById('msg-input');
+    if (inp) inp.focus();
   }
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
