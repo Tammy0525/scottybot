@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Safe Space — Social Anxiety Reset</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;1,9..144,200;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F0E8;--warm:#FAF7F2;--sage:#7D9B76;--sage-light:#A8C4A2;--sage-dark:#4A6B44;--terra:#C47B5A;--terra-light:#E8A98A;--midnight:#1C1917;--charcoal:#2C2825;--stone:#6B6560;--mist:#D4CFC8;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;color:var(--charcoal);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}.screen.active{display:block;}
+#screen-login{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;padding:32px 24px;position:relative;overflow:hidden;}
+#screen-login::before{content:'';position:absolute;top:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(125,155,118,0.15),transparent 70%);}
+.login-inner{width:100%;max-width:400px;position:relative;z-index:1;animation:fadeUp 0.6s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.brand{text-align:center;margin-bottom:40px;}
+.brand-icon{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(74,107,68,0.25);}
+.brand h1{font-family:'Fraunces',serif;font-size:28px;font-weight:200;line-height:1.2;color:var(--charcoal);}
+.brand h1 em{font-style:italic;color:var(--sage-dark);}
+.brand p{font-size:14px;color:var(--stone);margin-top:6px;}
+.auth-tabs{display:flex;background:var(--warm);border-radius:14px;padding:4px;margin-bottom:24px;border:1px solid var(--mist);}
+.auth-tab{flex:1;padding:10px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--stone);cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:white;color:var(--charcoal);box-shadow:0 2px 8px rgba(28,25,23,0.08);}
+.auth-form{display:none;}.auth-form.active{display:block;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--stone);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+.field input{width:100%;background:var(--warm);border:1.5px solid var(--mist);border-radius:12px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--charcoal);outline:none;transition:border-color 0.2s;}
+.field input:focus{border-color:var(--sage);}
+.field input::placeholder{color:var(--mist);}
+.btn-primary{width:100%;background:var(--charcoal);color:var(--cream);border:none;border-radius:14px;padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:8px;transition:all 0.2s;}
+.btn-primary:hover{background:var(--sage-dark);}
+.btn-primary:active{transform:scale(0.98);}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.auth-error{background:rgba(196,123,90,0.1);border:1px solid rgba(196,123,90,0.3);color:var(--terra);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;}
+#screen-onboard{padding:48px 24px 80px;max-width:520px;margin:0 auto;}
+.onboard-step{display:none;animation:fadeUp 0.4s ease;}.onboard-step.active{display:block;}
+.onboard-eyebrow{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage);font-weight:500;margin-bottom:8px;}
+.onboard-title{font-family:'Fraunces',serif;font-size:30px;font-weight:200;line-height:1.2;margin-bottom:8px;}
+.onboard-title em{font-style:italic;color:var(--sage-dark);}
+.onboard-sub{font-size:14px;color:var(--stone);line-height:1.7;margin-bottom:28px;}
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+.option-card{background:var(--warm);border:2px solid var(--mist);border-radius:18px;padding:18px 16px;cursor:pointer;transition:all 0.2s;text-align:left;}
+.option-card:hover{border-color:var(--sage-light);transform:translateY(-2px);}
+.option-card.selected{border-color:var(--sage);background:rgba(125,155,118,0.07);}
+.option-icon{font-size:26px;margin-bottom:8px;display:block;}
+.option-title{font-size:14px;font-weight:500;color:var(--charcoal);margin-bottom:3px;}
+.option-desc{font-size:12px;color:var(--stone);line-height:1.5;}
+.pace-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.pace-card{background:var(--warm);border:2px solid var(--mist);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:14px;}
+.pace-card:hover{border-color:var(--sage-light);}
+.pace-card.selected{border-color:var(--sage);background:rgba(125,155,118,0.07);}
+.pace-icon{font-size:22px;flex-shrink:0;}
+.pace-title{font-size:14px;font-weight:500;color:var(--charcoal);}
+.pace-desc{font-size:12px;color:var(--stone);margin-top:1px;}
+.onboard-nav{display:flex;gap:10px;}
+.btn-secondary{flex:1;background:transparent;color:var(--stone);border:1.5px solid var(--mist);border-radius:14px;padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--stone);color:var(--charcoal);}
+#screen-dashboard{padding-bottom:80px;min-height:100vh;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--warm);border-top:1px solid var(--mist);display:flex;justify-content:space-around;padding:10px 0 22px;z-index:100;box-shadow:0 -6px 24px rgba(28,25,23,0.05);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 20px;transition:all 0.2s;}
+.nav-btn .ni{font-size:22px;transition:transform 0.2s;}
+.nav-btn .nl{font-size:10px;font-weight:500;color:var(--stone);text-transform:uppercase;letter-spacing:0.04em;}
+.nav-btn.active .nl{color:var(--sage-dark);}
+.nav-btn.active .ni{transform:scale(1.1);}
+.panel{display:none;}.panel.active{display:block;animation:fadeUp 0.3s ease;}
+.home-header{padding:52px 22px 20px;display:flex;justify-content:space-between;align-items:flex-start;}
+.home-greeting{font-family:'Fraunces',serif;font-size:26px;font-weight:200;line-height:1.2;}
+.home-greeting em{font-style:italic;color:var(--sage-dark);}
+.home-sub{font-size:13px;color:var(--stone);margin-top:4px;}
+.user-badge{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--sage-light),var(--terra-light));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(125,155,118,0.25);flex-shrink:0;}
+.session-card{background:var(--charcoal);color:var(--cream);border-radius:22px;padding:22px;margin:0 16px 16px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(28,25,23,0.18);}
+.session-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(125,155,118,0.25),transparent);}
+.session-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--sage-light);font-weight:500;margin-bottom:6px;}
+.session-title{font-family:'Fraunces',serif;font-size:20px;font-weight:300;line-height:1.3;margin-bottom:14px;position:relative;z-index:1;}
+.progress-wrap{background:rgba(255,255,255,0.1);border-radius:100px;height:4px;margin-bottom:6px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sage-light),var(--sage));border-radius:100px;transition:width 1s ease;}
+.progress-info{font-size:12px;color:rgba(245,240,232,0.55);display:flex;justify-content:space-between;}
+.start-btn{display:inline-flex;align-items:center;gap:8px;margin-top:18px;background:var(--sage);color:white;border:none;border-radius:100px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;position:relative;z-index:1;}
+.start-btn:hover{background:var(--sage-dark);transform:translateY(-1px);}
+.section-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--stone);font-weight:500;padding:0 20px;margin-bottom:10px;}
+.mood-row{display:flex;gap:8px;padding:0 16px;margin-bottom:14px;}
+.mood-chip{flex:1;background:var(--warm);border:1.5px solid var(--mist);border-radius:14px;padding:10px 4px;text-align:center;cursor:pointer;transition:all 0.2s;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.mood-chip span{font-size:9px;color:var(--stone);font-weight:500;}
+.mood-chip:hover,.mood-chip.selected{border-color:var(--sage);background:rgba(125,155,118,0.08);transform:translateY(-2px);}
+.scotty-peek{display:flex;gap:12px;align-items:flex-start;background:var(--warm);border:1px solid rgba(212,207,200,0.6);border-radius:18px;padding:16px;margin:0 16px 12px;cursor:pointer;transition:all 0.2s;}
+.scotty-peek:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(28,25,23,0.07);}
+.scotty-dot{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--sage),var(--sage-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.scotty-name-sm{font-size:12px;font-weight:500;color:var(--sage-dark);margin-bottom:3px;}
+.scotty-msg{font-size:13px;color:var(--charcoal);line-height:1.6;}
+.quick-link{display:flex;align-items:center;gap:12px;background:var(--warm);border:1px solid rgba(212,207,200,0.5);border-radius:16px;padding:14px 16px;margin:0 16px 10px;cursor:pointer;transition:all 0.2s;}
+.quick-link:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(28,25,23,0.06);}
+.quick-link .ql-icon{font-size:20px;}
+.quick-link .ql-title{font-size:14px;font-weight:500;}
+.quick-link .ql-sub{font-size:12px;color:var(--stone);margin-top:1px;}
+.quick-link .ql-arr{margin-left:auto;color:var(--mist);font-size:18px;}
+#panel-scotty{display:none;}.panel.active#panel-scotty{display:flex;flex-direction:column;height:100vh;}
+.chat-header{padding:52px 18px 14px;display:flex;align-items:center;gap:12px;background:var(--warm);border-bottom:1px solid var(--mist);flex-shrink:0;}
+.chat-header-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--sage),var(--sage-dark));display:flex;align-items:center;justify-content:center;font-size:18px;}
+.chat-header h2{font-family:'Fraunces',serif;font-size:20px;font-weight:300;}
+.online{font-size:12px;color:var(--sage);display:flex;align-items:center;gap:4px;}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--sage);box-shadow:0 0 0 2px rgba(125,155,118,0.2);}
+.chat-messages{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:14px;padding-bottom:140px;}
+.msg{display:flex;gap:8px;animation:fadeUp 0.3s ease;}
+.msg.user{flex-direction:row-reverse;}
+.msg-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--sage),var(--sage-dark));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;align-self:flex-end;}
+.msg.user .msg-av{background:linear-gradient(135deg,var(--terra-light),var(--terra));}
+.msg-bubble{max-width:78%;padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.65;font-weight:300;}
+.msg.scotty .msg-bubble{background:var(--warm);border:1px solid var(--mist);border-bottom-left-radius:5px;color:var(--charcoal);}
+.msg.user .msg-bubble{background:var(--sage-dark);color:white;border-bottom-right-radius:5px;}
+.quick-replies{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-left:38px;}
+.qr{background:rgba(125,155,118,0.1);border:1.5px solid rgba(125,155,118,0.25);color:var(--sage-dark);border-radius:100px;padding:6px 13px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.qr:hover{background:rgba(125,155,118,0.2);}
+.typing-indicator{display:flex;gap:4px;padding:13px 14px;background:var(--warm);border:1px solid var(--mist);border-radius:18px;border-bottom-left-radius:5px;width:60px;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:var(--mist);animation:bounce 1.2s ease infinite;}
+.t-dot:nth-child(2){animation-delay:0.15s;}
+.t-dot:nth-child(3){animation-delay:0.3s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+.chat-input-wrap{position:fixed;bottom:70px;left:0;right:0;padding:10px 14px;background:var(--warm);border-top:1px solid var(--mist);display:flex;gap:8px;align-items:flex-end;z-index:50;}
+.chat-input{flex:1;background:var(--cream);border:1.5px solid var(--mist);border-radius:18px;padding:11px 15px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);resize:none;outline:none;transition:border-color 0.2s;max-height:100px;min-height:44px;}
+.chat-input:focus{border-color:var(--sage);}
+.chat-input::placeholder{color:var(--mist);}
+.send-btn{width:42px;height:42px;border-radius:50%;background:var(--sage-dark);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all 0.2s;flex-shrink:0;color:white;}
+.send-btn:hover{background:var(--sage);transform:scale(1.05);}
+.send-btn:disabled{opacity:0.5;}
+.notes-header{padding:52px 22px 20px;}
+.notes-header h1{font-family:'Fraunces',serif;font-size:30px;font-weight:200;line-height:1.2;}
+.notes-header h1 em{font-style:italic;color:var(--terra);}
+.notes-header p{font-size:13px;color:var(--stone);margin-top:5px;line-height:1.6;}
+.new-note-btn{display:flex;align-items:center;gap:10px;background:var(--terra);color:white;border:none;border-radius:16px;padding:15px 18px;margin:0 16px 16px;width:calc(100% - 32px);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 14px rgba(196,123,90,0.22);}
+.new-note-btn:hover{background:#b36b4a;transform:translateY(-1px);}
+.note-card{background:var(--warm);border:1px solid rgba(212,207,200,0.55);border-radius:18px;padding:16px 18px;margin:0 16px 10px;cursor:pointer;transition:all 0.2s;}
+.note-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(28,25,23,0.07);}
+.note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.note-date{font-size:11px;color:var(--stone);font-weight:500;}
+.sharing-badge{font-size:10px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;padding:3px 8px;border-radius:100px;}
+.badge-private{background:rgba(107,101,96,0.1);color:var(--stone);}
+.badge-scotty{background:rgba(125,155,118,0.12);color:var(--sage-dark);}
+.badge-tea{background:rgba(196,123,90,0.12);color:var(--terra);}
+.badge-followup{background:rgba(201,168,76,0.14);color:#8A6818;}
+.note-preview{font-family:'Fraunces',serif;font-size:16px;font-weight:200;font-style:italic;line-height:1.55;color:var(--charcoal);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.tea-header{padding:52px 22px 8px;}
+.tea-header h1{font-family:'Fraunces',serif;font-size:28px;font-weight:200;line-height:1.2;}
+.tea-header h1 em{font-style:italic;color:var(--terra);}
+.tea-header p{font-size:13px;color:var(--stone);margin-top:5px;line-height:1.6;}
+.facilitated-note{display:flex;align-items:center;gap:8px;background:rgba(125,155,118,0.08);border:1px solid rgba(125,155,118,0.18);border-radius:12px;padding:10px 14px;margin:12px 16px;font-size:13px;color:var(--sage-dark);}
+.tea-post{background:var(--warm);border:1px solid rgba(212,207,200,0.5);border-radius:18px;padding:16px 18px;margin:0 16px 10px;}
+.tea-post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.anon-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.anon-name{font-size:13px;font-weight:500;}
+.anon-tag{font-size:11px;color:var(--stone);}
+.tea-text{font-size:14px;line-height:1.7;color:var(--charcoal);font-weight:300;}
+.tea-input-wrap{padding:12px 16px;display:flex;gap:8px;background:var(--warm);border-top:1px solid var(--mist);position:sticky;bottom:70px;}
+.tea-input{flex:1;background:var(--cream);border:1.5px solid var(--mist);border-radius:14px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);outline:none;transition:border-color 0.2s;}
+.tea-input:focus{border-color:var(--terra);}
+.tea-input::placeholder{color:var(--mist);}
+.tea-send{width:42px;height:42px;border-radius:50%;background:var(--terra);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all 0.2s;flex-shrink:0;color:white;}
+.tea-send:hover{background:#b36b4a;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,25,23,0.45);backdrop-filter:blur(4px);z-index:200;align-items:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--warm);border-radius:26px 26px 0 0;padding:14px 20px 44px;width:100%;animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:34px;height:4px;background:var(--mist);border-radius:100px;margin:0 auto 18px;}
+.sheet-title{font-family:'Fraunces',serif;font-size:22px;font-weight:300;margin-bottom:4px;}
+.sheet-sub{font-size:12px;color:var(--stone);margin-bottom:16px;}
+.note-textarea{width:100%;background:var(--cream);border:1.5px solid var(--mist);border-radius:14px;padding:13px 15px;font-family:'Fraunces',serif;font-size:16px;font-weight:200;font-style:italic;color:var(--charcoal);resize:none;outline:none;height:130px;transition:border-color 0.2s;line-height:1.6;}
+.note-textarea:focus{border-color:var(--terra);}
+.note-textarea::placeholder{color:var(--mist);}
+.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+.share-opt{border:2px solid var(--mist);border-radius:14px;padding:11px 12px;cursor:pointer;transition:all 0.2s;background:transparent;text-align:left;font-family:'DM Sans',sans-serif;}
+.share-opt .so-icon{font-size:18px;margin-bottom:4px;display:block;}
+.share-opt .so-title{font-size:12px;font-weight:500;color:var(--charcoal);display:block;}
+.share-opt .so-desc{font-size:11px;color:var(--stone);display:block;margin-top:1px;}
+.share-opt.selected{border-color:var(--sage);background:rgba(125,155,118,0.07);}
+.share-opt:hover{border-color:var(--sage-light);}
+.save-note{width:100%;background:var(--charcoal);color:var(--cream);border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.save-note:hover{background:var(--sage-dark);}
+.empty-state{text-align:center;padding:48px 24px;color:var(--stone);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-family:'Fraunces',serif;font-size:20px;font-weight:300;font-style:italic;margin-bottom:6px;}
+.empty-sub{font-size:13px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <div class="login-inner">
+    <div class="brand">
+      <div class="brand-icon">🌿</div>
+      <h1>Your <em>Safe Space</em></h1>
+      <p>Social Anxiety Reset · 10 sessions</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchTab('register')">Create account</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="form-login" class="auth-form active">
+      <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign in →</button>
+    </div>
+    <div id="form-register" class="auth-form">
+      <div class="field"><label>Your name</label><input type="text" id="reg-name" placeholder="What should Scotty call you?"></div>
+      <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="reg-password" placeholder="At least 8 characters" autocomplete="new-password"></div>
+      <button class="btn-primary" onclick="doRegister()">Create my space →</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-onboard" class="screen">
+  <div id="onboard-1" class="onboard-step active">
+    <div class="onboard-eyebrow">Step 1 of 3 · How you learn</div>
+    <div class="onboard-title">How does your brain <em>take things in?</em></div>
+    <div class="onboard-sub">Scotty adapts every session to match how you actually learn. No wrong answer.</div>
+    <div class="option-grid">
+      <div class="option-card" onclick="selectStyle('visual',this)"><span class="option-icon">🎨</span><div class="option-title">Visual</div><div class="option-desc">Metaphors, images, mental pictures. You think in scenes.</div></div>
+      <div class="option-card" onclick="selectStyle('auditory',this)"><span class="option-icon">🎵</span><div class="option-title">Auditory</div><div class="option-desc">Rhythm, conversation, you learn by listening and talking.</div></div>
+      <div class="option-card" onclick="selectStyle('reading_writing',this)"><span class="option-icon">📖</span><div class="option-title">Reading</div><div class="option-desc">Rich text, structure, deep journaling. You love words.</div></div>
+      <div class="option-card" onclick="selectStyle('kinesthetic',this)"><span class="option-icon">🏃</span><div class="option-title">Kinesthetic</div><div class="option-desc">Action first, then theory. You learn by doing.</div></div>
+    </div>
+    <button class="btn-primary" id="btn-style" onclick="nextOnboard(2)" disabled style="opacity:0.4">Next →</button>
+  </div>
+  <div id="onboard-2" class="onboard-step">
+    <div class="onboard-eyebrow">Step 2 of 3 · Your pace</div>
+    <div class="onboard-title">How fast do you want to <em>move?</em></div>
+    <div class="onboard-sub">10 sessions, your timeline. Scotty builds your personal roadmap.</div>
+    <div class="pace-options">
+      <div class="pace-card" onclick="selectPace('daily',this)"><span class="pace-icon">🔥</span><div><div class="pace-title">Daily — 10 days</div><div class="pace-desc">One session every day. Fast and focused.</div></div></div>
+      <div class="pace-card" onclick="selectPace('every_2_days',this)"><span class="pace-icon">🌱</span><div><div class="pace-title">Every 2 days — 20 days</div><div class="pace-desc">Space to breathe and reflect between sessions.</div></div></div>
+      <div class="pace-card" onclick="selectPace('3x_week',this)"><span class="pace-icon">🌊</span><div><div class="pace-title">3× a week — ~3.5 weeks</div><div class="pace-desc">Steady rhythm. Fits around a busy life.</div></div></div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn-secondary" onclick="nextOnboard(1)">Back</button>
+      <button class="btn-primary" id="btn-pace" onclick="nextOnboard(3)" disabled style="opacity:0.4;flex:2">Next →</button>
+    </div>
+  </div>
+  <div id="onboard-3" class="onboard-step">
+    <div class="onboard-eyebrow">Step 3 of 3 · Scotty reaching out</div>
+    <div class="onboard-title">When can Scotty <em>check in?</em></div>
+    <div class="onboard-sub">Scotty can reach out when you miss a session. You're always in control.</div>
+    <div style="margin-bottom:24px;">
+      <div class="pace-card" id="perm-push" onclick="togglePerm('push')" style="margin-bottom:8px;"><span class="pace-icon">🔔</span><div><div class="pace-title">Push notifications</div><div class="pace-desc">In-app alerts.</div></div></div>
+      <div class="pace-card" id="perm-sms" onclick="togglePerm('sms')" style="margin-bottom:8px;"><span class="pace-icon">💬</span><div><div class="pace-title">SMS text messages</div><div class="pace-desc">Quick texts from Scotty.</div></div></div>
+      <div class="pace-card" id="perm-wa" onclick="togglePerm('whatsapp')"><span class="pace-icon">📱</span><div><div class="pace-title">WhatsApp</div><div class="pace-desc">Messages via WhatsApp.</div></div></div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn-secondary" onclick="nextOnboard(2)">Back</button>
+      <button class="btn-primary" onclick="finishOnboarding()" style="flex:2">Enter my safe space 🌿</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-dashboard" class="screen">
+  <div id="panel-home" class="panel active">
+    <div class="home-header">
+      <div><div class="home-greeting">Hey, <em id="user-name-display">there</em> 🌿</div><div class="home-sub" id="session-sub">Loading...</div></div>
+      <div class="user-badge">🌸</div>
+    </div>
+    <div class="session-card">
+      <div class="session-label" id="session-label">📍 Session 1</div>
+      <div class="session-title" id="session-title">Understanding Social Anxiety &amp; Intro to CBT</div>
+      <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
+      <div class="progress-info"><span id="progress-text">Session 1 of 10</span><span id="progress-pct">10%</span></div>
+      <button class="start-btn" onclick="showPanel('scotty')">✨ Start with Scotty</button>
+    </div>
+    <div class="section-label" style="margin-top:4px;">How are you feeling?</div>
+    <div class="mood-row">
+      <div class="mood-chip" onclick="logMood('rough',this)">😔<span>rough</span></div>
+      <div class="mood-chip" onclick="logMood('okay',this)">😐<span>okay</span></div>
+      <div class="mood-chip" onclick="logMood('good',this)">😊<span>good</span></div>
+      <div class="mood-chip" onclick="logMood('great',this)">🤩<span>great</span></div>
+    </div>
+    <div class="scotty-peek" onclick="showPanel('scotty')">
+      <div class="scotty-dot">🤖</div>
+      <div><div class="scotty-name-sm">Scotty</div><div class="scotty-msg">Ready when you are. What's on your mind today?</div></div>
+    </div>
+    <div class="quick-link" onclick="showPanel('notes')"><span class="ql-icon">📝</span><div><div class="ql-title">Growth Notes</div><div class="ql-sub">Reflect on your journey</div></div><span class="ql-arr">→</span></div>
+    <div class="quick-link" onclick="showPanel('tea')"><span class="ql-icon">🫖</span><div><div class="ql-title">Lesson Tea</div><div class="ql-sub">Connect with others</div></div><span class="ql-arr">→</span></div>
+  </div>
+
+  <div id="panel-scotty" class="panel">
+    <div class="chat-header">
+      <div class="chat-header-avatar">🤖</div>
+      <div><div class="chat-header h2">Scotty</div><div class="online"><span class="online-dot"></span> Online</div></div>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg scotty">
+        <div class="msg-av">🤖</div>
+        <div><div class="msg-bubble">Hey there! 👋 I'm Scotty, your social anxiety coach. What's on your mind today?</div><div class="quick-replies"><span class="qr" onclick="sendMessage(this.innerText)">I feel anxious</span> <span class="qr" onclick="sendMessage(this.innerText)">Tell me about Session 1</span></div></div>
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <input type="text" id="msg-input" class="chat-input" placeholder="Share anything..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button class="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <div id="panel-notes" class="panel">
+    <div class="notes-header">
+      <h1>Growth <em>Notes</em></h1>
+      <p>Your reflections, shared only when you choose.</p>
+    </div>
+    <button class="new-note-btn" onclick="openNoteSheet()">+ New reflection</button>
+    <div id="notes-container"></div>
+  </div>
+
+  <div id="panel-tea" class="panel">
+    <div class="tea-header">
+      <h1>Lesson <em>Tea</em></h1>
+      <p>Real stories from others on this journey.</p>
+    </div>
+    <div class="facilitated-note">✨ Facilitated by Scotty to keep things supportive &amp; safe.</div>
+    <div id="tea-container"></div>
+    <div class="tea-input-wrap">
+      <input type="text" id="tea-input" class="tea-input" placeholder="Share your story (anonymous by default)..." onkeydown="if(event.key==='Enter') submitTeaPost()">
+      <button class="tea-send" onclick="submitTeaPost()">↑</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchNav('home')"><span class="ni">🏠</span><span class="nl">Home</span></button>
+  <button class="nav-btn" onclick="switchNav('scotty')"><span class="ni">🤖</span><span class="nl">Scotty</span></button>
+  <button class="nav-btn" onclick="switchNav('notes')"><span class="ni">📝</span><span class="nl">Notes</span></button>
+  <button class="nav-btn" onclick="switchNav('tea')"><span class="ni">🫖</span><span class="nl">Tea</span></button>
+</div>
+
+<div id="overlay" class="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">New Reflection</div>
+    <div class="sheet-sub" id="sheet-sub">Save a thought or moment from today.</div>
+    <textarea id="note-text" class="note-textarea" placeholder="What's on your mind?"></textarea>
+    <div class="share-grid" id="share-opts">
+      <button class="share-opt selected" data-sharing="private" onclick="selectSharing(this,'private')"><span class="so-icon">🔒</span><span class="so-title">Private</span><span class="so-desc">Just for me</span></button>
+      <button class="share-opt" data-sharing="scotty" onclick="selectSharing(this,'scotty')"><span class="so-icon">🤖</span><span class="so-title">With Scotty</span><span class="so-desc">Coach sees it</span></button>
+      <button class="share-opt" data-sharing="tea" onclick="selectSharing(this,'tea')"><span class="so-icon">🫖</span><span class="so-title">Lesson Tea</span><span class="so-desc">Share story</span></button>
+      <button class="share-opt" data-sharing="followup" onclick="selectSharing(this,'followup')"><span class="so-icon">💌</span><span class="so-title">Follow-up</span><span class="so-desc">Scotty replies</span></button>
+    </div>
+    <button class="save-note" onclick="saveNote()">Save reflection</button>
+  </div>
+</div>
+
+<script>
+let selectedStyle = null;
+let selectedPace = null;
+let selectedPerms = { push: true, sms: false, whatsapp: false };
+let selectedSharing = 'private';
+let currentUser = null;
+let currentSession = 1;
+let isMobile = /iPhone|iPad|Android/.test(navigator.userAgent);
+
+async function checkAuth() {
+  const res = await fetch('/api/me');
+  if (res.ok) {
+    currentUser = await res.json();
+    currentSession = currentUser.current_session || 1;
+    showScreen('dashboard');
+    loadDashboard();
+  }
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'dashboard') {
+    document.querySelector('.bottom-nav').style.display = 'flex';
+    showPanel('home');
+  } else {
+    document.querySelector('.bottom-nav').style.display = 'none';
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('form-' + tab).classList.add('active');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  
+  if (res.ok) {
+    currentUser = (await res.json()).user;
+    showScreen('onboard');
+  } else {
+    err.innerText = "Hmm, that didn't work. Try again?";
+    err.style.display = 'block';
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  
+  const res = await fetch('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password })
+  });
+  
+  if (res.ok) {
+    currentUser = (await res.json()).user;
+    showScreen('onboard');
+  } else {
+    err.innerText = 'Email already taken, or something went wrong.';
+    err.style.display = 'block';
+  }
+}
+
+function selectStyle(style, el) {
+  document.querySelectorAll('#onboard-1 .option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedStyle = style;
+  document.getElementById('btn-style').disabled = false;
+  document.getElementById('btn-style').style.opacity = '1';
+}
+
+function selectPace(pace, el) {
+  document.querySelectorAll('#onboard-2 .pace-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPace = pace;
+  document.getElementById('btn-pace').disabled = false;
+  document.getElementById('btn-pace').style.opacity = '1';
+}
+
+function togglePerm(perm) {
+  selectedPerms[perm] = !selectedPerms[perm];
+  const card = document.getElementById('perm-' + perm);
+  card.classList.toggle('selected');
+}
+
+function nextOnboard(step) {
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('onboard-' + step).classList.add('active');
+}
+
+async function finishOnboarding() {
+  await fetch('/api/onboarding', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      learning_style: selectedStyle,
+      pace: selectedPace,
+      outreach_push: selectedPerms.push,
+      outreach_sms: selectedPerms.sms,
+      outreach_whatsapp: selectedPerms.whatsapp
+    })
+  });
+  
+  showScreen('dashboard');
+  loadDashboard();
+}
+
+function showPanel(name) {
+  if (name === 'scotty') {
+    document.getElementById('msg-input').focus();
+  }
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  
+  if (name === 'notes') loadNotes();
+  if (name === 'tea') loadTea();
+}
+
+function switchNav(name) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.nav-btn').classList.add('active');
+  
+  if (name === 'scotty') showPanel('scotty');
+  else if (name === 'notes') showPanel('notes');
+  else if (name === 'tea') showPanel('tea');
+  else showPanel('home');
+}
+
+async function loadDashboard() {
+  document.getElementById('user-name-display').innerText = currentUser.name || 'friend';
+  document.getElementById('session-sub').innerText = `On Session ${currentSession} of 10`;
+  
+  const pct = (currentSession / 10) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').innerText = `Session ${currentSession} of 10`;
+  document.getElementById('progress-pct').innerText = Math.round(pct) + '%';
+}
+
+async function sendMessage(msg) {
+  const input = msg || document.getElementById('msg-input').value;
+  if (!input.trim()) return;
+  
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += `<div class="msg user"><div class="msg-av">👤</div><div class="msg-bubble">${escapeHtml(input)}</div></div>`;
+  document.getElementById('msg-input').value = '';
+  
+  container.innerHTML += `<div class="msg scotty"><div class="msg-av">🤖</div><div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div>`;
+  container.scrollTop = container.scrollHeight;
+  
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: input })
+    });
+    
+    const data = await res.json();
+    container.querySelector('.typing-indicator').parentElement.parentElement.remove();
+    container.innerHTML += `<div class="msg scotty"><div class="msg-av">🤖</div><div class="msg-bubble">${escapeHtml(data.response || 'I'm here for you 💚')}</div></div>`;
+    container.scrollTop = container.scrollHeight;
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function logMood(mood, el) {
+  document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  fetch('/api/mood', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mood }) });
+}
+
+function openNoteSheet() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('note-text').focus();
+}
+
+function selectSharing(el, sharing) {
+  document.querySelectorAll('.share-opt').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSharing = sharing;
+}
+
+async function saveNote() {
+  const text = document.getElementById('note-text').value;
+  if (!text.trim()) return;
+  
+  await fetch('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: text, sharing: selectedSharing })
+  });
+  
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('note-text').value = '';
+  loadNotes();
+}
+
+async function loadNotes() {
+  const res = await fetch('/api/notes');
+  const data = await res.json();
+  const container = document.getElementById('notes-container');
+  
+  if (!data.notes || data.notes.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">No reflections yet</div><div class="empty-sub">Start journaling to track your growth.</div></div>';
+    return;
+  }
+  
+  container.innerHTML = data.notes.map(n => `
+    <div class="note-card">
+      <div class="note-meta">
+        <span class="note-date">${new Date(n.created_at).toLocaleDateString()}</span>
+        <span class="sharing-badge badge-${n.sharing}">${n.sharing.replace(/_/g,' ')}</span>
+      </div>
+      <div class="note-preview">"${escapeHtml(n.content.substring(0, 100))}"</div>
+    </div>
+  `).join('');
+}
+
+async function loadTea() {
+  const res = await fetch(`/api/tea/${currentSession}`);
+  const data = await res.json();
+  const container = document.getElementById('tea-container');
+  
+  if (!data.posts || data.posts.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🫖</div><div class="empty-title">No stories yet</div><div class="empty-sub">Be the first to share yours.</div></div>';
+    return;
+  }
+  
+  container.innerHTML = data.posts.map(p => `
+    <div class="tea-post">
+      <div class="tea-post-header">
+        <div class="anon-av">${p.anonymous ? '👤' : '👨'}</div>
+        <div><div class="anon-name">${p.display_name}</div><div class="anon-tag">${p.anonymous ? 'Anonymous' : 'Named'}</div></div>
+      </div>
+      <div class="tea-text">${escapeHtml(p.content)}</div>
+    </div>
+  `).join('');
+}
+
+async function submitTeaPost() {
+  const text = document.getElementById('tea-input').value;
+  if (!text.trim()) return;
+  
+  await fetch('/api/tea', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: text, anonymous: true })
+  });
+  
+  document.getElementById('tea-input').value = '';
+  loadTea();
+}
+
+function escapeHtml(text) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Init
+checkAuth();
+</script>
+</body>
+</html>
