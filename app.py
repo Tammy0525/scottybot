@@ -259,7 +259,7 @@ def register():
         session['user_id'] = user['id']
         return jsonify({'success': True, 'user': {'name': user['name'], 'email': user['email']}})
     except sqlite3.IntegrityError:
-        return jsonify({'error': 'An account with this email already exists'}), 409
+        return jsonify({'error': 'already_exists'}), 409
     finally:
         db.close()
 
