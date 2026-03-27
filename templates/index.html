@@ -180,6 +180,31 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 .empty-icon{font-size:40px;margin-bottom:12px;}
 .empty-title{font-family:'Fraunces',serif;font-size:20px;font-weight:300;font-style:italic;margin-bottom:6px;}
 .empty-sub{font-size:13px;line-height:1.6;}
+.space-header{padding:52px 22px 16px;}
+.space-header h1{font-family:'Fraunces',serif;font-size:28px;font-weight:200;line-height:1.2;}
+.space-header h1 em{font-style:italic;color:var(--sage-dark);}
+.space-header p{font-size:13px;color:var(--stone);margin-top:5px;line-height:1.6;}
+.space-room-preview{margin:0 16px 18px;border-radius:22px;overflow:hidden;background:var(--warm);border:1.5px solid var(--mist);min-height:180px;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all 0.4s;}
+.room-scene{font-size:60px;text-align:center;line-height:1;margin-bottom:6px;}
+.room-desc{font-size:13px;color:var(--stone);font-style:italic;}
+.room-avatar-wrap{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);}
+.space-section{padding:0 16px;margin-bottom:18px;}
+.space-section-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--stone);font-weight:500;margin-bottom:10px;}
+.picker-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.picker-row::-webkit-scrollbar{display:none;}
+.pick-chip{flex-shrink:0;background:var(--warm);border:2px solid var(--mist);border-radius:14px;padding:10px 14px;cursor:pointer;transition:all 0.2s;text-align:center;font-size:22px;min-width:52px;}
+.pick-chip.selected{border-color:var(--sage);background:rgba(125,155,118,0.1);}
+.pick-chip:hover{border-color:var(--sage-light);}
+.pick-chip-label{font-size:9px;color:var(--stone);margin-top:4px;font-weight:500;}
+.avatar-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--warm);border:1px solid var(--mist);border-radius:16px;padding:14px 16px;margin:0 16px 14px;}
+.avatar-toggle-label{font-size:14px;font-weight:500;color:var(--charcoal);}
+.avatar-toggle-sub{font-size:12px;color:var(--stone);margin-top:2px;}
+.toggle-switch{width:46px;height:26px;background:var(--mist);border-radius:100px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle-switch.on{background:var(--sage);}
+.toggle-knob{width:22px;height:22px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+.toggle-switch.on .toggle-knob{left:22px;}
+.save-space-btn{width:calc(100% - 32px);margin:0 16px 16px;background:var(--sage-dark);color:white;border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.save-space-btn:hover{background:var(--sage);}
 </style>
 </head>
 <body>
@@ -319,6 +344,76 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
       <button class="tea-send" onclick="submitTeaPost()">↑</button>
     </div>
   </div>
+
+  <div id="panel-space" class="panel">
+    <div class="space-header">
+      <h1>My <em>Safe Space</em></h1>
+      <p>Build the room that feels like you. Your avatar is yours — show as much or as little as you want.</p>
+    </div>
+
+    <div class="space-room-preview" id="room-preview">
+      <div class="room-scene" id="room-scene-emoji">🛋️</div>
+      <div class="room-desc" id="room-scene-desc">Your cozy den</div>
+      <div class="room-avatar-wrap" id="avatar-display" style="font-size:36px;display:none;">🙂</div>
+    </div>
+
+    <div class="avatar-toggle-row" onclick="toggleAvatar()">
+      <div><div class="avatar-toggle-label">Show my avatar</div><div class="avatar-toggle-sub">Opt in when you feel ready</div></div>
+      <div class="toggle-switch" id="avatar-toggle"><div class="toggle-knob"></div></div>
+    </div>
+
+    <div id="avatar-pickers" style="display:none;">
+      <div class="space-section">
+        <div class="space-section-title">Avatar vibe</div>
+        <div class="picker-row" id="picker-avatar">
+          <div class="pick-chip selected" data-val="🙂" onclick="pickAvatar(this)">🙂<div class="pick-chip-label">chill</div></div>
+          <div class="pick-chip" data-val="😎" onclick="pickAvatar(this)">😎<div class="pick-chip-label">cool</div></div>
+          <div class="pick-chip" data-val="🥰" onclick="pickAvatar(this)">🥰<div class="pick-chip-label">warm</div></div>
+          <div class="pick-chip" data-val="🤔" onclick="pickAvatar(this)">🤔<div class="pick-chip-label">thinker</div></div>
+          <div class="pick-chip" data-val="🧘" onclick="pickAvatar(this)">🧘<div class="pick-chip-label">zen</div></div>
+          <div class="pick-chip" data-val="🎧" onclick="pickAvatar(this)">🎧<div class="pick-chip-label">vibes</div></div>
+          <div class="pick-chip" data-val="🌙" onclick="pickAvatar(this)">🌙<div class="pick-chip-label">quiet</div></div>
+          <div class="pick-chip" data-val="✨" onclick="pickAvatar(this)">✨<div class="pick-chip-label">bright</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-section">
+      <div class="space-section-title">Room vibe</div>
+      <div class="picker-row" id="picker-room">
+        <div class="pick-chip selected" data-val="cozy_den" data-emoji="🛋️" data-desc="Your cozy den" onclick="pickRoom(this)">🛋️<div class="pick-chip-label">cozy den</div></div>
+        <div class="pick-chip" data-val="rooftop" data-emoji="🌆" data-desc="Rooftop terrace" onclick="pickRoom(this)">🌆<div class="pick-chip-label">rooftop</div></div>
+        <div class="pick-chip" data-val="forest" data-emoji="🌲" data-desc="Forest cabin" onclick="pickRoom(this)">🌲<div class="pick-chip-label">forest</div></div>
+        <div class="pick-chip" data-val="beach" data-emoji="🏖️" data-desc="Beach shack" onclick="pickRoom(this)">🏖️<div class="pick-chip-label">beach</div></div>
+        <div class="pick-chip" data-val="stars" data-emoji="🌌" data-desc="Stargazing room" onclick="pickRoom(this)">🌌<div class="pick-chip-label">stars</div></div>
+        <div class="pick-chip" data-val="garden" data-emoji="🌸" data-desc="Quiet garden" onclick="pickRoom(this)">🌸<div class="pick-chip-label">garden</div></div>
+      </div>
+    </div>
+
+    <div class="space-section">
+      <div class="space-section-title">Your seat</div>
+      <div class="picker-row" id="picker-seat">
+        <div class="pick-chip selected" data-val="beanbag" onclick="pickChip('seat',this)">🫘<div class="pick-chip-label">bean bag</div></div>
+        <div class="pick-chip" data-val="hammock" onclick="pickChip('seat',this)">🪢<div class="pick-chip-label">hammock</div></div>
+        <div class="pick-chip" data-val="cushion" onclick="pickChip('seat',this)">🧸<div class="pick-chip-label">cushion</div></div>
+        <div class="pick-chip" data-val="couch" onclick="pickChip('seat',this)">🛋️<div class="pick-chip-label">couch</div></div>
+        <div class="pick-chip" data-val="floor" onclick="pickChip('seat',this)">🪷<div class="pick-chip-label">floor</div></div>
+      </div>
+    </div>
+
+    <div class="space-section">
+      <div class="space-section-title">Lighting</div>
+      <div class="picker-row" id="picker-light">
+        <div class="pick-chip selected" data-val="golden" onclick="pickChip('light',this)">🌅<div class="pick-chip-label">golden hr</div></div>
+        <div class="pick-chip" data-val="lamp" onclick="pickChip('light',this)">🕯️<div class="pick-chip-label">lamp glow</div></div>
+        <div class="pick-chip" data-val="fairy" onclick="pickChip('light',this)">✨<div class="pick-chip-label">fairy lights</div></div>
+        <div class="pick-chip" data-val="daylight" onclick="pickChip('light',this)">☀️<div class="pick-chip-label">daylight</div></div>
+        <div class="pick-chip" data-val="moon" onclick="pickChip('light',this)">🌙<div class="pick-chip-label">moonlight</div></div>
+      </div>
+    </div>
+
+    <button class="save-space-btn" onclick="saveSpace()">Save my space 🌿</button>
+  </div>
 </div>
 
 <div class="bottom-nav">
@@ -326,6 +421,7 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
   <button class="nav-btn" onclick="switchNav('scotty')"><span class="ni">🤖</span><span class="nl">Scotty</span></button>
   <button class="nav-btn" onclick="switchNav('notes')"><span class="ni">📝</span><span class="nl">Notes</span></button>
   <button class="nav-btn" onclick="switchNav('tea')"><span class="ni">🫖</span><span class="nl">Tea</span></button>
+  <button class="nav-btn" onclick="switchNav('space')"><span class="ni">🏡</span><span class="nl">My Space</span></button>
 </div>
 
 <div id="overlay" class="overlay">
@@ -486,6 +582,7 @@ function switchNav(name) {
   if (name === 'scotty') showPanel('scotty');
   else if (name === 'notes') showPanel('notes');
   else if (name === 'tea') showPanel('tea');
+  else if (name === 'space') { showPanel('space'); loadSpace(); }
   else showPanel('home');
 }
 
@@ -617,6 +714,97 @@ async function submitTeaPost() {
 function escapeHtml(text) {
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
   return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// ── My Space ────────────────────────────────────────────
+let spaceConfig = { avatarEnabled: false, avatar: '🙂', room: 'cozy_den', seat: 'beanbag', light: 'golden' };
+
+function toggleAvatar() {
+  spaceConfig.avatarEnabled = !spaceConfig.avatarEnabled;
+  const tog = document.getElementById('avatar-toggle');
+  const pickers = document.getElementById('avatar-pickers');
+  const avDisp = document.getElementById('avatar-display');
+  tog.classList.toggle('on', spaceConfig.avatarEnabled);
+  pickers.style.display = spaceConfig.avatarEnabled ? 'block' : 'none';
+  avDisp.style.display = spaceConfig.avatarEnabled ? 'block' : 'none';
+  if (spaceConfig.avatarEnabled) avDisp.innerText = spaceConfig.avatar;
+}
+
+function pickAvatar(el) {
+  document.querySelectorAll('#picker-avatar .pick-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  spaceConfig.avatar = el.dataset.val;
+  document.getElementById('avatar-display').innerText = spaceConfig.avatar;
+}
+
+function pickRoom(el) {
+  document.querySelectorAll('#picker-room .pick-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  spaceConfig.room = el.dataset.val;
+  document.getElementById('room-scene-emoji').innerText = el.dataset.emoji;
+  document.getElementById('room-scene-desc').innerText = el.dataset.desc;
+}
+
+function pickChip(group, el) {
+  document.querySelectorAll(`#picker-${group} .pick-chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  spaceConfig[group] = el.dataset.val;
+}
+
+async function saveSpace() {
+  await fetch('/api/room', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      room: { vibe: spaceConfig.room, seat: spaceConfig.seat, light: spaceConfig.light },
+      avatar: { enabled: spaceConfig.avatarEnabled, style: spaceConfig.avatar }
+    })
+  });
+  const btn = document.querySelector('.save-space-btn');
+  btn.innerText = 'Saved! 🌿';
+  setTimeout(() => { btn.innerText = 'Save my space 🌿'; }, 2000);
+}
+
+async function loadSpace() {
+  try {
+    const res = await fetch('/api/room');
+    if (!res.ok) return;
+    const data = await res.json();
+    const room = data.room || {};
+    const avatar = data.avatar || {};
+
+    if (room.vibe) {
+      spaceConfig.room = room.vibe;
+      const chip = document.querySelector(`#picker-room [data-val="${room.vibe}"]`);
+      if (chip) { pickRoom(chip); chip.classList.add('selected'); }
+    }
+    if (room.seat) {
+      spaceConfig.seat = room.seat;
+      document.querySelectorAll('#picker-seat .pick-chip').forEach(c => c.classList.remove('selected'));
+      const s = document.querySelector(`#picker-seat [data-val="${room.seat}"]`);
+      if (s) s.classList.add('selected');
+    }
+    if (room.light) {
+      spaceConfig.light = room.light;
+      document.querySelectorAll('#picker-light .pick-chip').forEach(c => c.classList.remove('selected'));
+      const l = document.querySelector(`#picker-light [data-val="${room.light}"]`);
+      if (l) l.classList.add('selected');
+    }
+    if (avatar.style) {
+      spaceConfig.avatar = avatar.style;
+      document.getElementById('avatar-display').innerText = avatar.style;
+      document.querySelectorAll('#picker-avatar .pick-chip').forEach(c => c.classList.remove('selected'));
+      const a = document.querySelector(`#picker-avatar [data-val="${avatar.style}"]`);
+      if (a) a.classList.add('selected');
+    }
+    if (avatar.enabled) {
+      spaceConfig.avatarEnabled = true;
+      document.getElementById('avatar-toggle').classList.add('on');
+      document.getElementById('avatar-pickers').style.display = 'block';
+      document.getElementById('avatar-display').style.display = 'block';
+      document.getElementById('avatar-display').innerText = spaceConfig.avatar;
+    }
+  } catch(e) { console.error('loadSpace:', e); }
 }
 
 // Init
