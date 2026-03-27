@@ -6,7 +6,6 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 requires-python = ">=3.11"
 dependencies = [
-    "discord.py",
     "requests",
     "flask",
     "anthropic>=0.86.0",
