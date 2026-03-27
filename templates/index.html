@@ -519,7 +519,7 @@ async function sendMessage(msg) {
     
     const data = await res.json();
     container.querySelector('.typing-indicator').parentElement.parentElement.remove();
-    container.innerHTML += `<div class="msg scotty"><div class="msg-av">🤖</div><div class="msg-bubble">${escapeHtml(data.response || 'I'm here for you 💚')}</div></div>`;
+    container.innerHTML += `<div class="msg scotty"><div class="msg-av">🤖</div><div class="msg-bubble">${escapeHtml(data.response || "I'm here for you 💚")}</div></div>`;
     container.scrollTop = container.scrollHeight;
   } catch(e) {
     console.error(e);
