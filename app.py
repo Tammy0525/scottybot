@@ -277,14 +277,16 @@ def login():
         return jsonify({'error': 'Invalid email or password'}), 401
 
     session['user_id'] = user['id']
+    learning_style = user['learning_style']
+    onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
     return jsonify({
         'success': True,
         'user': {
             'name': user['name'],
             'email': user['email'],
             'current_session': user['current_session'],
-            'learning_style': user['learning_style'],
-            'onboarded': user['learning_style'] is not None
+            'learning_style': learning_style,
+            'onboarded': onboarded
         }
     })
 
