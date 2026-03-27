@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Safe Space — Social Anxiety Reset</title>
+<title>Scotty · Social Anxiety Reset</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;1,9..144,200;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#F5F0E8;--warm:#FAF7F2;--sage:#7D9B76;--sage-light:#A8C4A2;--sage-dark:#4A6B44;--terra:#C47B5A;--terra-light:#E8A98A;--midnight:#1C1917;--charcoal:#2C2825;--stone:#6B6560;--mist:#D4CFC8;}
@@ -212,8 +212,8 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 <div id="screen-login" class="screen active">
   <div class="login-inner">
     <div class="brand">
-      <div class="brand-icon">🌿</div>
-      <h1>Your <em>Safe Space</em></h1>
+      <div class="brand-icon">🤖</div>
+      <h1><em>Scotty</em></h1>
       <p>Social Anxiety Reset · 10 sessions</p>
     </div>
     <div class="auth-tabs">
@@ -523,7 +523,12 @@ async function doRegister() {
     currentUser = (await res.json()).user;
     showScreen('onboard');
   } else {
-    err.innerText = 'Email already taken, or something went wrong.';
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 409 || data.error === 'already_exists') {
+      err.innerHTML = "Looks like you already have an account. <strong>Try signing in instead!</strong>";
+    } else {
+      err.innerText = 'Something went wrong. Check your details and try again.';
+    }
     err.style.display = 'block';
   }
 }
