@@ -4,11 +4,11 @@ Core Flask application
 """
 
 import os
+import re
 import json
 import asyncio
-import requests as http_requests
 from datetime import datetime, timezone
-from flask import Flask, request, jsonify, session, render_template, redirect
+from flask import Flask, request, jsonify, session, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 import anthropic
 import sqlite3
@@ -22,89 +22,6 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-in-produc
 
 course_reader = CourseReader('./course_materials')
 claude_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-
-# ── VerusOS Safety ────────────────────────────────────
-
-VERUSOS_URL = os.environ.get("VERUSOS_URL", "http://localhost:5001")
-VERUSOS_API_KEY = os.environ.get("VERUSOS_API_KEY", "")
-
-
-def check_verusos_safety(message, user_id=None):
-    """Route message through VerusOS /api/v1/detect for crisis detection.
-    Returns (is_crisis, detection_result) tuple."""
-    try:
-        headers = {"Content-Type": "application/json"}
-        if VERUSOS_API_KEY:
-            headers["X-API-Key"] = VERUSOS_API_KEY
-
-        resp = http_requests.post(
-            f"{VERUSOS_URL}/api/v1/detect",
-            json={"message": message},
-            headers=headers,
-            timeout=5,
-        )
-
-        if resp.status_code != 200:
-            print(f"VerusOS returned {resp.status_code}: {resp.text[:200]}")
-            return False, None
-
-        result = resp.json()
-        return result.get("crisis_detected", False), result
-
-    except http_requests.exceptions.ConnectionError:
-        print("VerusOS unavailable — skipping safety check")
-        return False, None
-    except Exception as e:
-        print(f"VerusOS safety check error: {e}")
-        return False, None
-
-
-def log_crisis_event(user_id, message, detection_result):
-    """Log a crisis detection event to the database."""
-    db = get_db()
-    db.execute(
-        '''INSERT INTO crisis_events
-           (user_id, message_text, risk_level, risk_score, patterns_matched, intervention)
-           VALUES (?, ?, ?, ?, ?, ?)''',
-        (
-            user_id,
-            message,
-            detection_result.get("risk_level", "UNKNOWN"),
-            detection_result.get("risk_score", 0),
-            json.dumps(detection_result.get("patterns_matched", [])),
-            json.dumps(detection_result.get("intervention", {})),
-        )
-    )
-    db.commit()
-    db.close()
-
-
-def build_crisis_response(detection_result):
-    """Build a warm intervention response from VerusOS detection data."""
-    intervention = detection_result.get("intervention", {})
-    resources = intervention.get("resources", [])
-
-    response = (
-        "I hear you, and I care about what you're going through. "
-        "This sounds really hard, and you deserve support right now.\n\n"
-    )
-
-    if resources:
-        response += "Please reach out to someone who's trained for this moment:\n"
-        for resource in resources[:3]:
-            response += f"- {resource}\n"
-    else:
-        response += (
-            "Please reach out to a crisis line — in the US that's **988** "
-            "(call or text). They're trained for this moment.\n"
-        )
-
-    response += (
-        "\nI'm here too, and we can keep talking. "
-        "But please connect with them first — they can help in ways I can't."
-    )
-    return response
-
 
 # ── Database ───────────────────────────────────────────
 
@@ -174,18 +91,6 @@ def init_db():
             content TEXT NOT NULL,
             anonymous INTEGER DEFAULT 1,
             display_name TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-
-        CREATE TABLE IF NOT EXISTS crisis_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            message_text TEXT NOT NULL,
-            risk_level TEXT NOT NULL,
-            risk_score REAL DEFAULT 0,
-            patterns_matched TEXT DEFAULT '[]',
-            intervention TEXT DEFAULT '{}',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
@@ -306,10 +211,11 @@ def get_scotty_response(user, user_message):
     """Get Scotty's AI response using Claude."""
     current_session = user['current_session'] or 1
 
+    learning_style = user['learning_style'] or 'visual'
     session_content = ""
     try:
-        lesson = run_async(course_reader.get_content(current_session, 'Lesson Content'))
-        ai_guidance = run_async(course_reader.get_content(current_session, 'AI Support Guidance'))
+        lesson = run_async(course_reader.get_content(current_session, 'Lesson Content', learning_style=learning_style))
+        ai_guidance = run_async(course_reader.get_content(current_session, 'AI Support Guidance', learning_style=learning_style))
         session_content = f"LESSON:\n{lesson}\n\nSCOTTY GUIDANCE:\n{ai_guidance}"
     except Exception as e:
         print(f"Error loading course content: {e}")
@@ -454,28 +360,6 @@ def chat():
     try:
         save_message(user['id'], 'user', message, current_session)
 
-        # ── VerusOS safety check before Claude ──
-        is_crisis, detection = check_verusos_safety(message, user['id'])
-
-        if is_crisis and detection:
-            log_crisis_event(user['id'], message, detection)
-            scotty_reply = build_crisis_response(detection)
-            save_message(user['id'], 'assistant', scotty_reply, current_session)
-
-            db = get_db()
-            db.execute('UPDATE users SET last_active = ? WHERE id = ?',
-                       (datetime.now(timezone.utc), user['id']))
-            db.commit()
-            db.close()
-
-            return jsonify({
-                'response': scotty_reply,
-                'session': current_session,
-                'crisis_detected': True,
-                'risk_level': detection.get('risk_level'),
-            })
-
-        # ── Normal flow: send to Claude ──
         scotty_reply = get_scotty_response(user, message)
 
         save_message(user['id'], 'assistant', scotty_reply, current_session)
@@ -507,17 +391,20 @@ def get_session(session_num):
         return jsonify({'error': 'Invalid session number'}), 400
 
     try:
-        content = run_async(course_reader.get_content(session_num, 'Lesson Content'))
-        journal = run_async(course_reader.get_content(session_num, 'Journal Prompts'))
-        exercise = run_async(course_reader.get_content(session_num, 'Daily Exercise'))
-        motivation = run_async(course_reader.get_content(session_num, 'Motivation'))
+        style = user['learning_style'] or 'visual'
+        content = run_async(course_reader.get_content(session_num, 'Lesson Content', learning_style=style))
+        journal = run_async(course_reader.get_content(session_num, 'Journal Prompts', learning_style=style))
+        exercise = run_async(course_reader.get_content(session_num, 'Daily Exercise', learning_style=style))
+        motivation = run_async(course_reader.get_content(session_num, 'Motivation', learning_style=style))
 
         return jsonify({
             'session': session_num,
             'content': content,
             'journal_prompts': journal,
             'exercise': exercise,
-            'motivation': motivation
+            'motivation': motivation,
+            'learning_style': style,
+            'adapted': course_reader.adapted_exists(session_num, style)
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -735,11 +622,6 @@ def get_room():
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/api/health')
-def health():
-    return jsonify({'status': 'ok'})
 
 # ── Run ────────────────────────────────────────────────
 
