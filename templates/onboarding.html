@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Safe Space — Let's get started</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;1,9..144,200;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F5F0E8;--warm:#FAF7F2;--sage:#7D9B76;--sage-light:#A8C4A2;
+  --sage-dark:#4A6B44;--terra:#C47B5A;--terra-light:#E8A98A;
+  --charcoal:#2C2825;--stone:#6B6560;--mist:#D4CFC8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;color:var(--charcoal);min-height:100vh;overflow:hidden;}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{
+  position:fixed;top:0;left:0;right:0;height:3px;
+  background:rgba(212,207,200,0.4);z-index:200;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--sage-light),var(--sage));
+  border-radius:100px;transition:width 0.4s ease;width:0%;
+}
+
+/* ── PHASE LABEL ── */
+.phase-label{
+  position:fixed;top:12px;left:0;right:0;
+  text-align:center;font-size:11px;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--stone);font-weight:500;z-index:199;
+}
+
+/* ── SCREENS ── */
+.screen{display:none;position:fixed;inset:0;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── INTRO CHAT SCREEN ── */
+#screen-intro{
+  background:var(--cream);
+  flex-direction:column;
+}
+
+.chat-top{
+  flex-shrink:0;
+  padding:52px 20px 16px;
+  display:flex;align-items:center;gap:12px;
+  background:var(--warm);
+  border-bottom:1px solid var(--mist);
+}
+
+.scotty-av{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--sage),var(--sage-dark));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+
+.chat-top h2{font-family:'Fraunces',serif;font-size:20px;font-weight:300;}
+.online{font-size:12px;color:var(--sage);display:flex;align-items:center;gap:4px;}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--sage);}
+
+.chat-msgs{
+  flex:1;overflow-y:auto;
+  padding:20px 16px 100px;
+  display:flex;flex-direction:column;gap:14px;
+}
+
+.msg{display:flex;gap:10px;animation:fadeUp 0.35s ease;}
+.msg.user{flex-direction:row-reverse;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.msg-av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--sage),var(--sage-dark));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;align-self:flex-end;
+}
+.msg.user .msg-av{background:linear-gradient(135deg,var(--terra-light),var(--terra));}
+
+.msg-bubble{
+  max-width:78%;padding:12px 15px;border-radius:18px;
+  font-size:14px;line-height:1.65;font-weight:300;
+}
+.msg.scotty .msg-bubble{
+  background:var(--warm);border:1px solid var(--mist);
+  border-bottom-left-radius:5px;color:var(--charcoal);
+}
+.msg.user .msg-bubble{
+  background:var(--sage-dark);color:white;
+  border-bottom-right-radius:5px;
+}
+
+.typing-ind{
+  display:flex;gap:4px;padding:13px 15px;
+  background:var(--warm);border:1px solid var(--mist);
+  border-radius:18px;border-bottom-left-radius:5px;width:58px;
+}
+.t-dot{width:7px;height:7px;border-radius:50%;background:var(--mist);animation:tdot 1.2s ease infinite;}
+.t-dot:nth-child(2){animation-delay:0.15s;}
+.t-dot:nth-child(3){animation-delay:0.3s;}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+.chat-input-wrap{
+  position:fixed;bottom:0;left:0;right:0;
+  padding:10px 14px 24px;
+  background:var(--warm);border-top:1px solid var(--mist);
+  display:flex;gap:8px;align-items:flex-end;
+  z-index:50;
+}
+.chat-input{
+  flex:1;background:var(--cream);border:1.5px solid var(--mist);
+  border-radius:18px;padding:11px 15px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);
+  resize:none;outline:none;transition:border-color 0.2s;
+  max-height:100px;min-height:44px;
+}
+.chat-input:focus{border-color:var(--sage);}
+.chat-input::placeholder{color:var(--mist);}
+.chat-input:disabled{opacity:0.5;}
+
+.send-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--sage-dark);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:white;transition:all 0.2s;flex-shrink:0;
+}
+.send-btn:hover{background:var(--sage);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ── CARD SCREEN ── */
+#screen-cards{
+  background:var(--cream);
+  align-items:center;justify-content:center;
+  padding:60px 20px 100px;
+}
+
+.card-stage{
+  width:100%;max-width:420px;
+  position:relative;
+  height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* THE CARD */
+.q-card{
+  position:absolute;
+  width:100%;
+  background:var(--warm);
+  border-radius:28px;
+  padding:28px 24px 24px;
+  border:1px solid rgba(212,207,200,0.6);
+  box-shadow:0 12px 40px rgba(28,25,23,0.1);
+  transition:transform 0.4s cubic-bezier(0.34,1.2,0.64,1), opacity 0.3s ease;
+  will-change:transform;
+}
+
+.q-card.exit-left{
+  transform:translateX(-110%) rotate(-8deg);
+  opacity:0;
+  pointer-events:none;
+}
+
+.q-card.enter-right{
+  transform:translateX(110%) rotate(4deg);
+  opacity:0;
+}
+
+.q-card.center{
+  transform:translateX(0) rotate(0deg);
+  opacity:1;
+}
+
+/* intro/transition card */
+.q-card.intro-card{
+  text-align:center;
+  padding:36px 28px 28px;
+}
+
+.card-badge{
+  display:inline-block;
+  background:rgba(125,155,118,0.12);
+  color:var(--sage-dark);
+  border-radius:100px;
+  padding:5px 14px;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+
+.card-badge.gad{
+  background:rgba(196,123,90,0.12);
+  color:var(--terra);
+}
+
+.card-icon{font-size:44px;margin-bottom:16px;display:block;}
+
+.card-title{
+  font-family:'Fraunces',serif;
+  font-size:24px;font-weight:200;line-height:1.25;
+  margin-bottom:12px;
+}
+.card-title em{font-style:italic;color:var(--sage-dark);}
+.card-title.gad-title em{color:var(--terra);}
+
+.card-body{
+  font-size:14px;color:var(--stone);line-height:1.75;
+  margin-bottom:24px;
+}
+
+.card-cta{
+  width:100%;background:var(--charcoal);color:var(--cream);
+  border:none;border-radius:14px;padding:15px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;
+}
+.card-cta:hover{background:var(--sage-dark);}
+
+/* question card */
+.q-num{
+  font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--stone);font-weight:500;margin-bottom:12px;
+}
+
+.q-text{
+  font-family:'Fraunces',serif;
+  font-size:20px;font-weight:300;line-height:1.35;
+  margin-bottom:22px;color:var(--charcoal);
+}
+
+/* ANSWER OPTIONS */
+.answers{display:flex;flex-direction:column;gap:10px;}
+
+.answer-opt{
+  display:flex;align-items:center;gap:12px;
+  background:var(--cream);
+  border:2px solid var(--mist);
+  border-radius:16px;padding:13px 16px;
+  cursor:pointer;transition:all 0.2s;
+  font-size:14px;color:var(--charcoal);
+  font-family:'DM Sans',sans-serif;
+  text-align:left;width:100%;
+}
+
+.answer-opt:hover{border-color:var(--sage-light);background:rgba(125,155,118,0.04);}
+.answer-opt.selected{border-color:var(--sage);background:rgba(125,155,118,0.08);}
+.answer-opt.gad-opt:hover{border-color:var(--terra-light);background:rgba(196,123,90,0.04);}
+.answer-opt.gad-opt.selected{border-color:var(--terra);background:rgba(196,123,90,0.08);}
+
+.opt-emoji{font-size:20px;flex-shrink:0;}
+.opt-text{flex:1;line-height:1.4;}
+
+/* NEXT button on card */
+.card-next{
+  width:100%;margin-top:16px;
+  background:var(--charcoal);color:var(--cream);
+  border:none;border-radius:14px;padding:14px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;
+  display:none;
+}
+.card-next.visible{display:block;}
+.card-next:hover{background:var(--sage-dark);}
+
+/* stacked background cards */
+.card-stack-2{
+  position:absolute;
+  width:96%;
+  background:var(--warm);
+  border-radius:28px;
+  height:80px;
+  bottom:-10px;
+  border:1px solid rgba(212,207,200,0.4);
+  z-index:-1;
+  opacity:0.6;
+}
+.card-stack-3{
+  position:absolute;
+  width:92%;
+  background:var(--warm);
+  border-radius:28px;
+  height:80px;
+  bottom:-18px;
+  border:1px solid rgba(212,207,200,0.3);
+  z-index:-2;
+  opacity:0.3;
+}
+
+/* ── RESULT SCREEN ── */
+#screen-result{
+  background:var(--cream);
+  align-items:center;justify-content:center;
+  padding:40px 24px;
+  text-align:center;
+}
+
+.result-icon{font-size:56px;margin-bottom:20px;}
+.result-title{
+  font-family:'Fraunces',serif;font-size:30px;font-weight:200;
+  line-height:1.2;margin-bottom:12px;
+}
+.result-title em{font-style:italic;color:var(--sage-dark);}
+.result-sub{font-size:14px;color:var(--stone);line-height:1.7;max-width:340px;margin:0 auto 32px;}
+
+.result-badges{
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+  margin-bottom:32px;
+}
+
+.result-badge{
+  background:var(--warm);border:1px solid var(--mist);
+  border-radius:100px;padding:8px 18px;
+  font-size:13px;font-weight:500;color:var(--charcoal);
+}
+
+.result-cta{
+  width:100%;max-width:340px;
+  background:var(--sage-dark);color:white;
+  border:none;border-radius:16px;padding:16px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;
+}
+.result-cta:hover{background:var(--sage);}
+
+/* Scotty reaction between phases */
+.scotty-reaction{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:var(--charcoal);color:var(--cream);
+  border-radius:100px;padding:10px 20px;
+  font-size:13px;font-weight:400;
+  white-space:nowrap;
+  animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:300;
+  display:none;
+}
+.scotty-reaction.show{display:block;}
+@keyframes popIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
+/* ── WELCOME CARDS SCREEN ── */
+#screen-welcome{
+  background:var(--charcoal);
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  overflow:hidden;
+}
+
+/* background organic shapes */
+#screen-welcome::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(125,155,118,0.15),transparent 70%);
+  pointer-events:none;
+}
+#screen-welcome::after{
+  content:'';position:absolute;bottom:-60px;left:-60px;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(196,123,90,0.1),transparent 70%);
+  pointer-events:none;
+}
+
+.welcome-stage{
+  width:100%;height:100%;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  padding:60px 24px 100px;
+}
+
+.w-card{
+  position:absolute;
+  width:calc(100% - 48px);
+  max-width:400px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:28px;
+  padding:36px 28px 32px;
+  backdrop-filter:blur(10px);
+  transition:transform 0.45s cubic-bezier(0.34,1.1,0.64,1), opacity 0.35s ease;
+  will-change:transform,opacity;
+}
+
+.w-card.center{transform:translateX(0) rotate(0deg);opacity:1;}
+.w-card.exit-left{transform:translateX(-115%) rotate(-6deg);opacity:0;pointer-events:none;}
+.w-card.enter-right{transform:translateX(115%) rotate(4deg);opacity:0;}
+
+/* stacked cards behind */
+.w-stack-2{
+  position:absolute;
+  width:calc(100% - 64px);max-width:384px;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:28px;height:80px;
+  bottom:calc(50% - 200px);
+  transform:translateY(14px);
+  z-index:-1;
+}
+.w-stack-3{
+  position:absolute;
+  width:calc(100% - 80px);max-width:368px;
+  background:rgba(255,255,255,0.015);
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:28px;height:80px;
+  bottom:calc(50% - 200px);
+  transform:translateY(26px);
+  z-index:-2;
+}
+
+.w-card-icon{font-size:40px;margin-bottom:18px;display:block;}
+
+.w-card-eyebrow{
+  font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--sage-light);font-weight:500;margin-bottom:10px;
+}
+
+.w-card-headline{
+  font-family:'Fraunces',serif;
+  font-size:28px;font-weight:200;line-height:1.2;
+  color:white;margin-bottom:14px;
+}
+.w-card-headline em{font-style:italic;color:var(--sage-light);}
+
+.w-card-body{
+  font-size:14px;color:rgba(245,240,232,0.7);
+  line-height:1.8;margin-bottom:24px;
+}
+.w-card-body strong{color:rgba(245,240,232,0.95);font-weight:500;}
+
+/* dot indicators */
+.w-dots{
+  display:flex;gap:6px;justify-content:center;margin-bottom:20px;
+}
+.w-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  transition:all 0.3s ease;
+}
+.w-dot.active{
+  background:var(--sage-light);
+  width:20px;border-radius:100px;
+}
+
+.w-btn{
+  width:100%;
+  background:var(--sage);color:white;
+  border:none;border-radius:14px;padding:15px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;
+}
+.w-btn:hover{background:var(--sage-dark);}
+
+.w-btn-ghost{
+  width:100%;
+  background:transparent;
+  color:rgba(245,240,232,0.4);
+  border:none;padding:10px;
+  font-family:'DM Sans',sans-serif;font-size:13px;
+  cursor:pointer;transition:all 0.2s;margin-top:6px;
+}
+.w-btn-ghost:hover{color:rgba(245,240,232,0.7);}
+
+/* card 4 special list */
+.w-list{
+  display:flex;flex-direction:column;gap:10px;
+  margin:12px 0 20px;
+}
+.w-list-item{
+  display:flex;gap:10px;align-items:flex-start;
+}
+.w-list-icon{
+  font-size:16px;flex-shrink:0;margin-top:1px;
+}
+.w-list-text{
+  font-size:13px;color:rgba(245,240,232,0.75);line-height:1.55;
+}
+.w-list-text strong{color:rgba(245,240,232,0.95);font-weight:500;}
+
+/* swipe hint */
+.swipe-hint{
+  position:absolute;bottom:30px;left:0;right:0;
+  text-align:center;
+  font-size:12px;color:rgba(245,240,232,0.25);
+  letter-spacing:0.06em;
+  animation:hintFade 2s ease 2s forwards;
+  opacity:1;
+}
+@keyframes hintFade{to{opacity:0;}}
+
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+<div class="phase-label" id="phase-label">Getting to know you</div>
+
+
+<!-- ════════ WELCOME CARDS ════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-stage">
+    <div class="w-stack-3"></div>
+    <div class="w-stack-2"></div>
+    <div class="w-card center" id="w-card"></div>
+  </div>
+  <div class="w-dots" id="w-dots" style="position:fixed;bottom:72px;left:0;right:0;">
+    <div class="w-dot active"></div>
+    <div class="w-dot"></div>
+    <div class="w-dot"></div>
+    <div class="w-dot"></div>
+    <div class="w-dot"></div>
+    <div class="w-dot"></div>
+  </div>
+  <div class="swipe-hint">swipe or tap to continue</div>
+</div>
+
+<!-- ════════ INTRO CHAT ════════ -->
+<div id="screen-intro" class="screen active">
+  <div class="chat-top">
+    <div class="scotty-av">🤖</div>
+    <div>
+      <h2>Scotty</h2>
+      <div class="online"><span class="online-dot"></span>here with you</div>
+    </div>
+  </div>
+
+  <div class="chat-msgs" id="chat-msgs"></div>
+
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chat-input"
+      placeholder="Talk to Scotty..." rows="1"
+      onkeydown="chatKeydown(event)"
+      oninput="autoResize(this)"
+      disabled></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendIntro()" disabled>➤</button>
+  </div>
+</div>
+
+<!-- ════════ CARDS ════════ -->
+<div id="screen-cards" class="screen">
+  <div class="card-stage" id="card-stage">
+    <div class="card-stack-3"></div>
+    <div class="card-stack-2"></div>
+    <div class="q-card center" id="active-card"></div>
+  </div>
+  <div class="scotty-reaction" id="scotty-reaction"></div>
+</div>
+
+<!-- ════════ RESULT ════════ -->
+<div id="screen-result" class="screen">
+  <div class="result-icon" id="result-icon">🌿</div>
+  <div class="result-title" id="result-title">You're all set, <em id="result-name">friend</em></div>
+  <div class="result-sub" id="result-sub">Scotty knows how you learn and where you're starting from. Time to build your safe space.</div>
+  <div class="result-badges" id="result-badges"></div>
+  <button class="result-cta" onclick="finishOnboarding()">Enter my safe space 🌿</button>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────
+const state = {
+  userName: '',
+  introAnswers: [],
+  introStep: 0,
+  varkAnswers: {},
+  gadAnswers: {},
+  learningStyle: null,
+  gadScore: 0,
+  currentCardIndex: 0,
+  phase: 'intro', // intro | vark | gad | done
+};
+
+// ── INTRO QUESTIONS ───────────────────────────────────
+const introQuestions = [
+  {
+    scotty: "Hey! Before we get into anything, I just want to know a bit about you. 😊\n\nWhat's been going on that made you decide to try this?",
+    placeholder: "Take your time...",
+    replyPrefix: "Thanks for sharing that. It takes guts to even be here. 💚\n\n"
+  },
+  {
+    scotty: "What does anxiety look like for you day to day? Like what actually happens — thoughts, physical stuff, situations you avoid?",
+    placeholder: "Be as real as you want...",
+    replyPrefix: "I hear you. That's really helpful to know — I'll keep that in mind. 💚\n\n"
+  },
+  {
+    scotty: "Last one before we switch things up — if this program actually works, what would feel different for you?",
+    placeholder: "Dream a little...",
+    replyPrefix: "I love that. Let's make that happen. 🌱\n\nOkay — next up I want to figure out how your brain learns best. It's actually kind of fun 🧠✨"
+  }
+];
+
+// ── VARK QUESTIONS (10 selected) ──────────────────────
+const varkQuestions = [
+  {
+    id: 'q2',
+    text: "You're watching a YouTube tutorial on how to do something new. What actually helps it click for you?",
+    options: [
+      { emoji:'👁️', text:'The diagrams and visuals on screen', key:'a' },
+      { emoji:'🎧', text:'The person explaining it out loud', key:'b' },
+      { emoji:'📋', text:'The written steps in the description', key:'c' },
+      { emoji:'🖐️', text:'Watching them actually do it step by step', key:'d' },
+    ]
+  },
+  {
+    id: 'q5',
+    text: "When you're genuinely trying to understand something new, you:",
+    options: [
+      { emoji:'💬', text:'Talk it out — out loud, with a friend, or even to yourself', key:'a' },
+      { emoji:'🔍', text:'Notice patterns and connections to things you already know', key:'b' },
+      { emoji:'🧪', text:'Look for examples and real situations where it applies', key:'c' },
+      { emoji:'📚', text:'Read more about it until it fully makes sense', key:'d' },
+    ]
+  },
+  {
+    id: 'q7',
+    text: "Your friend group wants to play a game you've never heard of. You'd:",
+    options: [
+      { emoji:'👀', text:'Watch a round before jumping in', key:'a' },
+      { emoji:'🗣️', text:'Get someone to explain it and ask questions as you go', key:'b' },
+      { emoji:'🗺️', text:'Study the visual guide of how it works', key:'c' },
+      { emoji:'📖', text:'Read the instructions properly first', key:'d' },
+    ]
+  },
+  {
+    id: 'q9',
+    text: "You just downloaded a new app and have no idea how it works. You'd:",
+    options: [
+      { emoji:'📖', text:'Read through the help docs or setup guide', key:'a' },
+      { emoji:'💬', text:'Ask someone who already uses it to walk you through it', key:'b' },
+      { emoji:'🖱️', text:'Just start clicking around and figure it out as you go', key:'c' },
+      { emoji:'🗺️', text:'Follow along with a visual walkthrough or diagram', key:'d' },
+    ]
+  },
+  {
+    id: 'q10',
+    text: "When you're actually trying to learn something online, what keeps you most engaged?",
+    options: [
+      { emoji:'🎬', text:'Videos showing exactly how to do things', key:'a' },
+      { emoji:'✨', text:'Content that looks great — well designed and visual', key:'b' },
+      { emoji:'📝', text:'Long detailed articles or threads you can really get into', key:'c' },
+      { emoji:'🎙️', text:'Podcasts or videos where smart people just talk about it', key:'d' },
+    ]
+  },
+  {
+    id: 'q11',
+    text: "You're starting something new — a side project, a course, a creative thing. You'd want:",
+    options: [
+      { emoji:'📊', text:'A visual overview — stages, timeline, what success looks like', key:'a' },
+      { emoji:'📄', text:'A written doc explaining what it\'s all about', key:'b' },
+      { emoji:'💬', text:'A conversation where you can ask questions and think out loud', key:'c' },
+      { emoji:'🌍', text:'Real examples of people who\'ve done something similar', key:'d' },
+    ]
+  },
+  {
+    id: 'q13',
+    text: "Your ideal class, workshop, or tutorial would involve:",
+    options: [
+      { emoji:'🏃', text:'Hands-on activities — doing things, not just hearing about them', key:'a' },
+      { emoji:'💬', text:'Discussion, debate, Q&A — interactive and people talk', key:'b' },
+      { emoji:'📚', text:'Good notes, readings, or handouts you can take away', key:'c' },
+      { emoji:'📊', text:'Clear diagrams, charts, and visual frameworks', key:'d' },
+    ]
+  },
+  {
+    id: 'q14',
+    text: "You just did something and want feedback. You'd find it most useful if:",
+    options: [
+      { emoji:'🧪', text:'They used specific examples from your actual work', key:'a' },
+      { emoji:'📝', text:'You got a written summary of what went well and what didn\'t', key:'b' },
+      { emoji:'🗣️', text:'Someone talked it through with you in a conversation', key:'c' },
+      { emoji:'📈', text:'You could see a visual showing how you did vs before', key:'d' },
+    ]
+  },
+  {
+    id: 'q3',
+    text: "You're researching a festival you might go to. You'd mostly:",
+    options: [
+      { emoji:'📸', text:'Scroll through photos and highlights on their Instagram', key:'a' },
+      { emoji:'🗺️', text:'Check the map to see where everything is', key:'b' },
+      { emoji:'📖', text:'Read through the lineup and schedule in detail', key:'c' },
+      { emoji:'💬', text:'DM someone who went last year and ask about it', key:'d' },
+    ]
+  },
+  {
+    id: 'q16',
+    text: "You're trying to put something together and it's not working. You'd most likely:",
+    options: [
+      { emoji:'🖼️', text:'Go back through the visual diagrams to find what you missed', key:'a' },
+      { emoji:'📱', text:'Text or call someone and ask for help', key:'b' },
+      { emoji:'📖', text:'Re-read the written instructions more carefully', key:'c' },
+      { emoji:'🔧', text:'Try rearranging the pieces and work it out by doing', key:'d' },
+    ]
+  },
+];
+
+// VARK scoring map
+const varkScore = {
+  q2:  {a:'V',b:'A',c:'R',d:'K'},
+  q5:  {a:'A',b:'V',c:'K',d:'R'},
+  q7:  {a:'K',b:'A',c:'V',d:'R'},
+  q9:  {a:'R',b:'A',c:'K',d:'V'},
+  q10: {a:'K',b:'V',c:'R',d:'A'},
+  q11: {a:'V',b:'R',c:'A',d:'K'},
+  q13: {a:'K',b:'A',c:'R',d:'V'},
+  q14: {a:'K',b:'R',c:'A',d:'V'},
+  q3:  {a:'K',b:'V',c:'R',d:'A'},
+  q16: {a:'V',b:'A',c:'R',d:'K'},
+};
+
+// ── GAD-7 QUESTIONS ───────────────────────────────────
+const gadQuestions = [
+  "Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?",
+  "How often have you not been able to stop or control worrying?",
+  "How often have you been worrying too much about different things?",
+  "How often have you had trouble relaxing?",
+  "How often have you been so restless it's been hard to sit still?",
+  "How often have you become easily annoyed or irritable?",
+  "How often have you felt afraid, like something awful might happen?",
+];
+
+const gadOptions = [
+  {emoji:'🟢', text:'Not at all', value:0},
+  {emoji:'🟡', text:'Several days', value:1},
+  {emoji:'🟠', text:'More than half the days', value:2},
+  {emoji:'🔴', text:'Nearly every day', value:3},
+];
+
+// ── CARD QUEUE ────────────────────────────────────────
+// Will be built dynamically: [vark_intro, ...vark_qs, gad_intro, ...gad_qs]
+let cardQueue = [];
+let cardIndex = 0;
+let selectedAnswer = null;
+
+// ── UTILS ─────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function updateProgress(pct){
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function setPhaseLabel(txt){
+  document.getElementById('phase-label').textContent = txt;
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+function chatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendIntro();}
+}
+
+function escHtml(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── INTRO CHAT ────────────────────────────────────────
+function addMsg(role, text){
+  const c = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  const av = document.createElement('div');
+  av.className = 'msg-av';
+  av.textContent = role==='scotty' ? '🤖' : '🌸';
+  const b = document.createElement('div');
+  b.className = 'msg-bubble';
+  // preserve line breaks
+  b.innerHTML = escHtml(text).replace(/\n/g,'<br>');
+  d.appendChild(av); d.appendChild(b);
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function showTyping(){
+  const c = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className='msg scotty'; d.id='typing-ind';
+  const av=document.createElement('div');av.className='msg-av';av.textContent='🤖';
+  const ind=document.createElement('div');ind.className='typing-ind';
+  ind.innerHTML='<div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>';
+  d.appendChild(av);d.appendChild(ind);
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+function removeTyping(){
+  const t=document.getElementById('typing-ind');if(t)t.remove();
+}
+
+function enableInput(){
+  const inp=document.getElementById('chat-input');
+  const btn=document.getElementById('send-btn');
+  inp.disabled=false; btn.disabled=false;
+  inp.focus();
+}
+
+function disableInput(){
+  const inp=document.getElementById('chat-input');
+  const btn=document.getElementById('send-btn');
+  inp.disabled=true; btn.disabled=true;
+}
+
+async function sendIntro(){
+  const inp=document.getElementById('chat-input');
+  const text=inp.value.trim();
+  if(!text) return;
+
+  inp.value=''; inp.style.height='auto';
+  disableInput();
+
+  addMsg('user', text);
+  state.introAnswers.push(text);
+
+  // extract name from first answer if possible
+  if(state.introStep === 0){
+    state.userName = text.split(' ')[0] || 'friend';
+  }
+
+  const q = introQuestions[state.introStep];
+  showTyping();
+
+  await delay(1000 + text.length * 8);
+  removeTyping();
+
+  const isLast = state.introStep === introQuestions.length - 1;
+  addMsg('scotty', q.replyPrefix);
+
+  if(!isLast){
+    await delay(600);
+    showTyping();
+    await delay(900);
+    removeTyping();
+    addMsg('scotty', introQuestions[state.introStep + 1].scotty);
+    state.introStep++;
+    enableInput();
+    updateProgress(Math.round(((state.introStep) / 20) * 100));
+  } else {
+    // Move to cards
+    await delay(1200);
+    buildCardQueue();
+    showScreen('cards');
+    setPhaseLabel('How you learn');
+    updateProgress(15);
+    renderCurrentCard();
+  }
+}
+
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── CARD SYSTEM ───────────────────────────────────────
+function buildCardQueue(){
+  cardQueue = [];
+
+  // VARK intro card
+  cardQueue.push({type:'intro', phase:'vark'});
+
+  // VARK questions
+  varkQuestions.forEach((q,i) => {
+    cardQueue.push({type:'vark', questionIndex:i, question:q});
+  });
+
+  // GAD intro card
+  cardQueue.push({type:'intro', phase:'gad'});
+
+  // GAD questions
+  gadQuestions.forEach((q,i) => {
+    cardQueue.push({type:'gad', questionIndex:i, question:q});
+  });
+
+  cardIndex = 0;
+}
+
+function renderCurrentCard(){
+  const card = cardQueue[cardIndex];
+  const el = document.getElementById('active-card');
+
+  // reset
+  el.className = 'q-card enter-right';
+  selectedAnswer = null;
+
+  if(card.type === 'intro'){
+    renderIntroCard(card, el);
+  } else if(card.type === 'vark'){
+    renderVarkCard(card, el);
+  } else if(card.type === 'gad'){
+    renderGadCard(card, el);
+  }
+
+  // trigger enter animation
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      el.className = 'q-card center';
+    });
+  });
+
+  // update progress
+  const total = cardQueue.length;
+  const pct = Math.round(15 + (cardIndex / total) * 75);
+  updateProgress(pct);
+}
+
+function renderIntroCard(card, el){
+  if(card.phase === 'vark'){
+    setPhaseLabel('How you learn');
+    el.innerHTML = `
+      <div class="intro-card" style="text-align:center;padding:8px 4px;">
+        <span class="card-badge">Learning style</span>
+        <span class="card-icon">🧠</span>
+        <div class="card-title">How does your brain <em>take things in?</em></div>
+        <div class="card-body">
+          The next 10 questions are based on the <strong>VARK model</strong> —
+          a research-backed tool used worldwide to understand how people learn best.
+          It looks at whether you prefer Visual, Auditory, Reading/Writing,
+          or Kinesthetic learning.<br><br>
+          There's no right answer. Just pick what genuinely feels like you.
+          Scotty uses this to personalise every session.
+        </div>
+        <button class="card-cta" onclick="nextCard()">Let's go →</button>
+      </div>`;
+  } else {
+    setPhaseLabel('Where you\'re at');
+    el.innerHTML = `
+      <div class="intro-card" style="text-align:center;padding:8px 4px;">
+        <span class="card-badge gad">Anxiety check-in</span>
+        <span class="card-icon">🌿</span>
+        <div class="card-title gad-title">One more thing before we <em>begin</em></div>
+        <div class="card-body">
+          These next 7 questions are from the <strong>GAD-7</strong> — a clinically
+          validated tool used by therapists worldwide to understand anxiety levels.<br><br>
+          Your answers are completely private. Scotty uses them as a starting point —
+          we'll check in again at session 5 and session 10 so you can actually
+          <em>see</em> how much you've changed.<br><br>
+          There's no score to be ashamed of. This is just where you're starting from.
+        </div>
+        <button class="card-cta" onclick="nextCard()">I'm ready →</button>
+      </div>`;
+  }
+}
+
+function renderVarkCard(card, el){
+  const q = card.question;
+  const qNum = card.questionIndex + 1;
+  const existingAnswer = state.varkAnswers[q.id];
+
+  el.innerHTML = `
+    <div class="q-num">Question ${qNum} of 10</div>
+    <div class="q-text">${escHtml(q.text)}</div>
+    <div class="answers" id="answers-wrap">
+      ${q.options.map(o=>`
+        <button class="answer-opt${existingAnswer===o.key?' selected':''}"
+          onclick="selectVark('${q.id}','${o.key}',this)">
+          <span class="opt-emoji">${o.emoji}</span>
+          <span class="opt-text">${escHtml(o.text)}</span>
+        </button>
+      `).join('')}
+    </div>
+    <button class="card-next${existingAnswer?' visible':''}"
+      id="card-next-btn" onclick="nextCard()">
+      ${qNum < 10 ? 'Next →' : 'Almost done →'}
+    </button>`;
+
+  if(existingAnswer) selectedAnswer = existingAnswer;
+}
+
+function renderGadCard(card, el){
+  const qNum = card.questionIndex + 1;
+  const existingAnswer = state.gadAnswers[card.questionIndex];
+
+  el.innerHTML = `
+    <div class="q-num" style="color:var(--terra)">GAD-7 · Question ${qNum} of 7</div>
+    <div class="q-text">${escHtml(card.question)}</div>
+    <div class="answers" id="answers-wrap">
+      ${gadOptions.map(o=>`
+        <button class="answer-opt gad-opt${existingAnswer===o.value?' selected':''}"
+          onclick="selectGad(${card.questionIndex},${o.value},this)">
+          <span class="opt-emoji">${o.emoji}</span>
+          <span class="opt-text">${escHtml(o.text)}</span>
+        </button>
+      `).join('')}
+    </div>
+    <button class="card-next${existingAnswer!==undefined?' visible':''}"
+      id="card-next-btn" onclick="nextCard()">
+      ${qNum < 7 ? 'Next →' : 'Finish →'}
+    </button>`;
+}
+
+function selectVark(qId, key, el){
+  state.varkAnswers[qId] = key;
+  selectedAnswer = key;
+  document.querySelectorAll('.answer-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const nb = document.getElementById('card-next-btn');
+  if(nb) nb.classList.add('visible');
+}
+
+function selectGad(qIndex, value, el){
+  state.gadAnswers[qIndex] = value;
+  selectedAnswer = value;
+  document.querySelectorAll('.answer-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const nb = document.getElementById('card-next-btn');
+  if(nb) nb.classList.add('visible');
+}
+
+function nextCard(){
+  const el = document.getElementById('active-card');
+
+  // animate out
+  el.className = 'q-card exit-left';
+
+  setTimeout(()=>{
+    cardIndex++;
+
+    if(cardIndex >= cardQueue.length){
+      // All done
+      finishCards();
+      return;
+    }
+
+    const next = cardQueue[cardIndex];
+
+    // phase label transitions
+    if(next.type === 'intro' && next.phase === 'gad'){
+      showReaction("You're doing great! 💚 Almost there...");
+    }
+
+    renderCurrentCard();
+
+  }, 350);
+}
+
+function showReaction(text){
+  const el = document.getElementById('scotty-reaction');
+  el.textContent = text;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// ── SCORING ───────────────────────────────────────────
+function calculateVark(){
+  const scores = {V:0, A:0, R:0, K:0};
+  Object.entries(state.varkAnswers).forEach(([qId, key])=>{
+    const mode = varkScore[qId]?.[key];
+    if(mode) scores[mode]++;
+  });
+
+  const max = Math.max(...Object.values(scores));
+  const winners = Object.entries(scores).filter(([,v])=>v===max).map(([k])=>k);
+
+  const map = {V:'visual', A:'auditory', R:'reading_writing', K:'kinesthetic'};
+  const labels = {V:'Visual 🎨', A:'Auditory 🎵', R:'Reading/Writing 📖', K:'Kinesthetic 🏃'};
+
+  state.learningStyle = map[winners[0]];
+  return {scores, primary: winners[0], label: labels[winners[0]], isMulti: winners.length > 1, allLabels: winners.map(w=>labels[w])};
+}
+
+function calculateGad(){
+  let total = 0;
+  Object.values(state.gadAnswers).forEach(v=>{ total += v; });
+  state.gadScore = total;
+
+  if(total <= 4) return {level:'minimal', label:'Minimal anxiety', color:'#7D9B76'};
+  if(total <= 9) return {level:'mild', label:'Mild anxiety', color:'#B8963A'};
+  if(total <= 14) return {level:'moderate', label:'Moderate anxiety', color:'#C47B5A'};
+  return {level:'severe', label:'Significant anxiety', color:'#A0432A'};
+}
+
+// ── FINISH CARDS → RESULT SCREEN ─────────────────────
+function finishCards(){
+  const vark = calculateVark();
+  const gad = calculateGad();
+
+  updateProgress(95);
+  setPhaseLabel('All done');
+
+  // Build result screen
+  const name = state.userName || 'friend';
+  document.getElementById('result-name').textContent = name;
+
+  const gadResponses = {
+    minimal: "You're starting from a calm baseline — this program will help you build on that. 💚",
+    mild: "Mild anxiety is really common, and you're already doing something about it. 💚",
+    moderate: "That takes real courage to share. This is exactly what this program is designed for. You're in the right place. 💚",
+    severe: "Thank you for trusting me with that. We'll take this one session at a time. And if things ever feel too heavy, please reach out to someone you trust or a professional alongside this. 💚"
+  };
+
+  document.getElementById('result-sub').textContent = gadResponses[gad.level];
+
+  document.getElementById('result-badges').innerHTML = `
+    <div class="result-badge">🧠 ${vark.label}</div>
+    <div class="result-badge" style="color:${gad.color}">📊 ${gad.label}</div>
+  `;
+
+  showScreen('result');
+  updateProgress(100);
+}
+
+// ── SAVE & CONTINUE ───────────────────────────────────
+async function finishOnboarding(){
+  try {
+    await fetch('/api/onboarding', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        learning_style: state.learningStyle,
+        pace: 'daily',
+        gad7_baseline: state.gadScore,
+        intro_answers: state.introAnswers,
+        outreach_push: false,
+        outreach_sms: false,
+        outreach_whatsapp: false,
+      })
+    });
+    // redirect to dashboard
+    window.location.href = '/';
+  } catch(e){
+    console.error(e);
+    window.location.href = '/';
+  }
+}
+
+
+// ── WELCOME CARDS ─────────────────────────────────────
+const welcomeCards = [
+  {
+    eyebrow: 'Welcome',
+    icon: '🌿',
+    headline: '<em>You\u2019re here.</em>',
+    body: `That\u2019s not a small thing. Whether you\u2019ve been carrying this for years or it just started \u2014 the fact that you showed up today matters.
+
+This is your safe space. And we\u2019re really glad you found it.`,
+    btn: 'Keep going \u2192',
+    ghost: null,
+  },
+  {
+    eyebrow: 'What this is',
+    icon: '✨',
+    headline: 'Your course. <em>Your rules.</em>',
+    body: null,
+    list: [
+      { icon: '🔥', title: 'You set the pace.', desc: 'Daily grind or slow burn \u2014 you choose how often you show up.' },
+      { icon: '🤖', title: 'You get your own Scotty.', desc: 'Not a generic bot. One that learns how you think and what you need.' },
+      { icon: '🧠', title: 'The course comes to you.', desc: 'Built around your learning style. Visual, hands-on, deep-reader \u2014 however you vibe with information.' },
+      { icon: '📚', title: '10 sessions. Real CBT.', desc: 'The actual techniques therapists use for social anxiety. Not a quick fix \u2014 a real process.' },
+    ],
+    btn: 'Sounds good \u2192',
+    ghost: null,
+  },
+  {
+    eyebrow: 'Your coach',
+    icon: '🤖',
+    headline: 'Meet <em>Scotty.</em>',
+    body: `Scotty is an AI coach trained specifically in social anxiety and CBT. He delivers every session, checks in between them, and adapts to how you learn.
+
+He doesn\u2019t judge. He doesn\u2019t forget. And he\u2019s available at 3am when things get hard.
+
+This Scotty is built for you \u2014 not a version you share with anyone else.`,
+    btn: 'Hi Scotty \uD83D\uDC4B \u2192',
+    ghost: null,
+  },
+  {
+    eyebrow: 'The questions',
+    icon: '🧠',
+    headline: 'Yeah, there are questions. <em>We\u2019ll make it worth it.</em>',
+    body: `Look \u2014 we know filling things out isn\u2019t anyone\u2019s idea of a good time. But these ones actually matter, so hang in there.`,
+    list: [
+      { icon: '💬', title: 'A few intro questions', desc: 'Just you and Scotty talking. What brought you here, what anxiety looks like for you.' },
+      { icon: '🎯', title: 'A learning style quiz', desc: '10 quick questions so Scotty knows exactly how to present the course to you.' },
+      { icon: '⚡', title: 'Pace and preferences', desc: 'How often you want to show up and how you want Scotty to reach out.' },
+      { icon: '📊', title: 'A short anxiety check-in', desc: '7 questions used by therapists worldwide. Takes 2 mins. We check in again at sessions 5 and 10 so you can see the shift.' },
+    ],
+    footer: 'About 10 minutes total. Everything after is built specifically for you because of it.',
+    btn: 'Got it \u2192',
+    ghost: null,
+  },
+  {
+    eyebrow: 'Your privacy',
+    icon: '🔒',
+    headline: 'This space <em>belongs to you.</em>',
+    body: `Everything here is private by default. Your journal, your conversations, your check-ins \u2014 you control what Scotty sees and what stays just yours.
+
+You also decide how and when Scotty reaches out. He\u2019ll always ask before doing anything new.
+
+No data is ever sold. No ads. Ever.`,
+    btn: 'I trust it \u2192',
+    ghost: null,
+  },
+  {
+    eyebrow: 'Let\u2019s begin',
+    icon: '🌱',
+    headline: '<em>Ready</em> when you are.',
+    body: `There\u2019s no right way to feel about starting this. Nervous is okay. Skeptical is okay. Just being here is enough.
+
+Scotty\u2019s waiting. Let\u2019s go.`,
+    btn: 'Meet Scotty \u2192',
+    ghost: 'Skip intro',
+  },
+];
+
+let wIndex = 0;
+
+function renderWelcomeCard(index, direction){
+  const card = welcomeCards[index];
+  const el = document.getElementById('w-card');
+
+  // set enter position
+  el.className = direction === 'next' ? 'w-card enter-right' : 'w-card exit-left';
+
+  // build content
+  let html = '';
+  html += `<div class="w-card-eyebrow">${card.eyebrow}</div>`;
+  html += `<span class="w-card-icon">${card.icon}</span>`;
+  html += `<div class="w-card-headline">${card.headline}</div>`;
+
+  if(card.body){
+    html += `<div class="w-card-body">${card.body.replace(/\n/g,'<br>')}</div>`;
+  }
+
+  if(card.list){
+    html += '<div class="w-list">';
+    card.list.forEach(item => {
+      html += `<div class="w-list-item">
+        <span class="w-list-icon">${item.icon}</span>
+        <div class="w-list-text"><strong>${item.title}</strong> ${item.desc}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if(card.footer){
+    html += `<div style="font-size:12px;color:rgba(245,240,232,0.45);margin-bottom:20px;line-height:1.6;">${card.footer}</div>`;
+  }
+
+  html += `<button class="w-btn" onclick="nextWelcomeCard()">${card.btn}</button>`;
+  if(card.ghost){
+    html += `<button class="w-btn-ghost" onclick="skipWelcome()">${card.ghost}</button>`;
+  }
+
+  el.innerHTML = html;
+
+  // animate in
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      el.className = 'w-card center';
+    });
+  });
+
+  // update dots
+  document.querySelectorAll('.w-dot').forEach((d,i)=>{
+    d.classList.toggle('active', i === index);
+  });
+}
+
+function nextWelcomeCard(){
+  const el = document.getElementById('w-card');
+  el.className = 'w-card exit-left';
+
+  setTimeout(()=>{
+    wIndex++;
+    if(wIndex >= welcomeCards.length){
+      startScottyChat();
+    } else {
+      renderWelcomeCard(wIndex, 'next');
+    }
+  }, 380);
+}
+
+function skipWelcome(){
+  startScottyChat();
+}
+
+function startScottyChat(){
+  showScreen('intro');
+  document.getElementById('phase-label').textContent = 'Getting to know you';
+  document.getElementById('progress-fill').style.width = '2%';
+  // kick off intro chat
+  const q = introQuestions[0];
+  setTimeout(()=>{
+    showTyping();
+    setTimeout(()=>{
+      removeTyping();
+      addMsg('scotty', q.scotty);
+      enableInput();
+    }, 1200);
+  }, 400);
+}
+
+// ── INIT ──────────────────────────────────────────────
+(function init(){
+  // Start with welcome cards
+  renderWelcomeCard(0, 'next');
+})();
+</script>
+</body>
+</html>
