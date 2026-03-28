@@ -34,6 +34,13 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 .btn-primary:active{transform:scale(0.98);}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
 .auth-error{background:rgba(196,123,90,0.1);border:1px solid rgba(196,123,90,0.3);color:var(--terra);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;}
+.auth-success{background:rgba(125,155,118,0.1);border:1px solid rgba(125,155,118,0.3);color:var(--sage-dark);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;}
+.forgot-link{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--stone);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;width:100%;transition:color 0.2s;}
+.forgot-link:hover{color:var(--sage-dark);}
+.reset-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--stone);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;margin-bottom:20px;padding:0;transition:color 0.2s;}
+.reset-back:hover{color:var(--sage-dark);}
+.reset-title{font-family:'Fraunces',serif;font-size:22px;font-weight:200;color:var(--charcoal);margin-bottom:6px;}
+.reset-sub{font-size:13px;color:var(--stone);line-height:1.6;margin-bottom:20px;}
 #screen-onboard{padding:48px 24px 80px;max-width:520px;margin:0 auto;}
 .onboard-step{display:none;animation:fadeUp 0.4s ease;}.onboard-step.active{display:block;}
 .onboard-eyebrow{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage);font-weight:500;margin-bottom:8px;}
@@ -221,16 +228,27 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
       <button class="auth-tab" onclick="switchTab('register', this)">Create account</button>
     </div>
     <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
     <div id="form-login" class="auth-form active">
       <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"></div>
       <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="btn-primary" onclick="doLogin()">Sign in →</button>
+      <button class="forgot-link" onclick="showForgot()">Forgot password?</button>
     </div>
     <div id="form-register" class="auth-form">
       <div class="field"><label>Your name</label><input type="text" id="reg-name" placeholder="What should Scotty call you?"></div>
       <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"></div>
       <div class="field"><label>Password</label><input type="password" id="reg-password" placeholder="At least 8 characters" autocomplete="new-password"></div>
       <button class="btn-primary" onclick="doRegister()">Create my space →</button>
+    </div>
+    <div id="form-reset" class="auth-form">
+      <button class="reset-back" onclick="backToLogin()">← Back to sign in</button>
+      <div class="reset-title">Reset your <em style="font-style:italic;color:var(--sage-dark)">password</em></div>
+      <div class="reset-sub">Enter your email and choose a new password.</div>
+      <div class="field"><label>Email</label><input type="email" id="reset-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="field"><label>New password</label><input type="password" id="reset-password" placeholder="At least 8 characters" autocomplete="new-password"></div>
+      <div class="field"><label>Confirm password</label><input type="password" id="reset-confirm" placeholder="Same again" autocomplete="new-password"></div>
+      <button class="btn-primary" onclick="doResetPassword()">Update password →</button>
     </div>
   </div>
 </div>
@@ -482,6 +500,65 @@ function switchTab(tab, el) {
   el.classList.add('active');
   document.getElementById('form-' + tab).classList.add('active');
   document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+  document.querySelector('.auth-tabs').style.display = 'flex';
+}
+
+function showForgot() {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.querySelector('.auth-tabs').style.display = 'none';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+  document.getElementById('form-reset').classList.add('active');
+  document.getElementById('reset-email').value = document.getElementById('login-email').value || '';
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-confirm').value = '';
+}
+
+function backToLogin() {
+  document.querySelector('.auth-tabs').style.display = 'flex';
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.getElementById('form-login').classList.add('active');
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+}
+
+async function doResetPassword() {
+  const email = document.getElementById('reset-email').value.trim();
+  const password = document.getElementById('reset-password').value;
+  const confirm = document.getElementById('reset-confirm').value;
+  const err = document.getElementById('auth-error');
+  const suc = document.getElementById('auth-success');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+
+  if (!email) { err.innerText = 'Please enter your email.'; err.style.display = 'block'; return; }
+  if (password.length < 8) { err.innerText = 'Password must be at least 8 characters.'; err.style.display = 'block'; return; }
+  if (password !== confirm) { err.innerText = "Passwords don't match — try again."; err.style.display = 'block'; return; }
+
+  const btn = document.querySelector('#form-reset .btn-primary');
+  btn.disabled = true; btn.textContent = 'Updating...';
+
+  const res = await fetch('/api/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json().catch(() => ({}));
+
+  btn.disabled = false; btn.textContent = 'Update password →';
+
+  if (res.ok) {
+    suc.innerText = 'Password updated! Sign in with your new password.';
+    suc.style.display = 'block';
+    document.getElementById('login-email').value = email;
+    setTimeout(() => backToLogin(), 2000);
+  } else {
+    err.innerText = data.error || 'Something went wrong. Try again.';
+    err.style.display = 'block';
+  }
 }
 
 async function doLogin() {
