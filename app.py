@@ -50,6 +50,7 @@ def init_db():
             avatar_enabled INTEGER DEFAULT 1,
             room_config TEXT DEFAULT '{}',
             avatar_config TEXT DEFAULT '{}',
+            gad7_baseline INTEGER DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -320,11 +321,12 @@ def save_onboarding():
 
     data = request.get_json()
     learning_style = data.get('learning_style')
-    pace = data.get('pace')
+    pace = data.get('pace', 'daily')
     outreach_push = data.get('outreach_push', True)
     outreach_sms = data.get('outreach_sms', False)
     outreach_whatsapp = data.get('outreach_whatsapp', False)
     outreach_phone = data.get('outreach_phone', '')
+    gad7_baseline = data.get('gad7_baseline', None)
 
     db = get_db()
     db.execute('''
@@ -334,10 +336,11 @@ def save_onboarding():
             outreach_push = ?,
             outreach_sms = ?,
             outreach_whatsapp = ?,
-            outreach_phone = ?
+            outreach_phone = ?,
+            gad7_baseline = ?
         WHERE id = ?
     ''', (learning_style, pace, outreach_push, outreach_sms,
-          outreach_whatsapp, outreach_phone, user['id']))
+          outreach_whatsapp, outreach_phone, gad7_baseline, user['id']))
     db.commit()
     db.close()
 
@@ -624,6 +627,17 @@ def get_room():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/onboarding')
+def onboarding():
+    user = get_current_user()
+    if not user:
+        return render_template('index.html')
+    learning_style = user['learning_style']
+    onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
+    if onboarded:
+        return render_template('index.html')
+    return render_template('onboarding.html')
 
 # ── Run ────────────────────────────────────────────────
 
