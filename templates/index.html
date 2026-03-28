@@ -453,6 +453,12 @@ async function checkAuth() {
   const res = await fetch('/api/me');
   if (res.ok) {
     currentUser = await res.json();
+    const ls = currentUser.learning_style;
+    const onboarded = ls && ls !== '' && ls !== 'null';
+    if (!onboarded) {
+      window.location.href = '/onboarding';
+      return;
+    }
     currentSession = currentUser.current_session || 1;
     showScreen('dashboard');
     loadDashboard();
