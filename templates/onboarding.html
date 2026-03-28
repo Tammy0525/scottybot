@@ -555,6 +555,19 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 </div>
 
 <script>
+// ── Token-based auth: attach Bearer token to every same-origin request ──
+(function() {
+  const _fetch = window.fetch.bind(window);
+  window.fetch = function(url, opts) {
+    opts = opts || {};
+    const token = localStorage.getItem('scotty_token');
+    if (token && typeof url === 'string' && (url.startsWith('/') || url.startsWith(window.location.origin))) {
+      opts.headers = Object.assign({}, opts.headers || {}, { 'Authorization': 'Bearer ' + token });
+    }
+    return _fetch(url, opts);
+  };
+})();
+
 // ── STATE ─────────────────────────────────────────────
 const state = {
   userName: '',
