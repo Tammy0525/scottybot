@@ -498,7 +498,7 @@ async function doLogin() {
       showScreen('dashboard');
       loadDashboard();
     } else {
-      showScreen('onboard');
+      window.location.href = '/onboarding';
     }
   } else {
     err.innerText = "Hmm, that didn't work. Try again?";
@@ -521,7 +521,7 @@ async function doRegister() {
   
   if (res.ok) {
     currentUser = (await res.json()).user;
-    showScreen('onboard');
+    window.location.href = '/onboarding';
   } else {
     const data = await res.json().catch(() => ({}));
     if (res.status === 409 || data.error === 'already_exists') {
