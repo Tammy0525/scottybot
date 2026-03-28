@@ -472,12 +472,6 @@ async function checkAuth() {
   const res = await fetch('/api/me');
   if (res.ok) {
     currentUser = await res.json();
-    const ls = currentUser.learning_style;
-    const onboarded = ls && ls !== '' && ls !== 'null';
-    if (!onboarded) {
-      window.location.href = '/onboarding';
-      return;
-    }
     currentSession = currentUser.current_session || 1;
     showScreen('dashboard');
     loadDashboard();
@@ -575,15 +569,7 @@ async function doLogin() {
   });
   
   if (res.ok) {
-    const data = await res.json();
-    currentUser = data.user;
-    currentSession = currentUser.current_session || 1;
-    if (currentUser.onboarded) {
-      showScreen('dashboard');
-      loadDashboard();
-    } else {
-      window.location.href = '/onboarding';
-    }
+    window.location.href = '/';
   } else {
     err.innerText = "Hmm, that didn't work. Try again?";
     err.style.display = 'block';
@@ -604,8 +590,7 @@ async function doRegister() {
   });
   
   if (res.ok) {
-    currentUser = (await res.json()).user;
-    window.location.href = '/onboarding';
+    window.location.href = '/';
   } else {
     const data = await res.json().catch(() => ({}));
     if (res.status === 409 || data.error === 'already_exists') {
