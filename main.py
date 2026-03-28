@@ -354,6 +354,35 @@ def save_onboarding():
     return jsonify({'success': True})
 
 
+# ── Password Reset ──────────────────────────────────────
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    new_password = data.get('password', '')
+
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+    if len(new_password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+
+    db = get_db()
+    user = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+    if not user:
+        db.close()
+        return jsonify({'error': "We couldn't find an account with that email"}), 404
+
+    db.execute(
+        'UPDATE users SET password_hash = ? WHERE id = ?',
+        (generate_password_hash(new_password), user['id'])
+    )
+    db.commit()
+    db.close()
+
+    return jsonify({'success': True})
+
+
 # ── Chat ───────────────────────────────────────────────
 
 @app.route('/api/chat', methods=['POST'])
