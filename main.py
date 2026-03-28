@@ -671,18 +671,17 @@ def get_room():
 
 @app.route('/')
 def index():
+    user = get_current_user()
+    if user:
+        learning_style = user['learning_style']
+        onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
+        if not onboarded:
+            return render_template('onboarding.html')
     return render_template('index.html')
 
 @app.route('/onboarding')
 def onboarding():
-    user = get_current_user()
-    if not user:
-        return render_template('index.html')
-    learning_style = user['learning_style']
-    onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
-    if onboarded:
-        return render_template('index.html')
-    return render_template('onboarding.html')
+    return index()
 
 
 # ── Run ────────────────────────────────────────────────
