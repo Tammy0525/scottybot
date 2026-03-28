@@ -322,15 +322,73 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;co
 /* ── RESULT SCREEN ── */
 #screen-result{
   background:var(--cream);
-  align-items:center;justify-content:center;
-  padding:40px 24px;text-align:center;
+  align-items:center;justify-content:flex-start;
+  padding:60px 24px 40px;text-align:center;
+  overflow-y:auto;
 }
 .result-icon{font-size:52px;margin-bottom:18px;}
 .result-title{font-family:'Fraunces',serif;font-size:28px;font-weight:200;line-height:1.2;margin-bottom:10px;}
 .result-title em{font-style:italic;color:var(--sage-dark);}
 .result-sub{font-size:14px;color:var(--stone);line-height:1.75;max-width:340px;margin:0 auto 28px;}
-.result-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;}
-.result-badge{background:var(--warm);border:1px solid var(--mist);border-radius:100px;padding:8px 18px;font-size:13px;font-weight:500;color:var(--charcoal);}
+.result-badges{display:flex;flex-direction:column;gap:10px;align-items:center;margin-bottom:28px;width:100%;max-width:340px;}
+
+/* ── EXPANDABLE BADGES ── */
+.result-badge{
+  background:var(--warm);border:1.5px solid var(--mist);
+  border-radius:100px;padding:10px 20px;
+  font-size:13px;font-weight:500;color:var(--charcoal);
+  cursor:pointer;transition:all 0.3s ease;
+  position:relative;
+}
+.result-badge.expanded{
+  border-radius:18px;
+  padding:14px 18px;
+  width:100%;max-width:340px;
+  border-color:var(--sage);
+}
+.result-badge.gad-badge.expanded{ border-color:var(--terra); }
+
+.badge-summary{display:flex;align-items:center;gap:8px;justify-content:center;}
+.badge-chevron{
+  font-size:11px;color:var(--stone);
+  transition:transform 0.3s ease;display:inline-block;
+  margin-left:4px;
+}
+.result-badge.expanded .badge-chevron{transform:rotate(180deg);}
+
+.badge-detail{
+  display:none;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--mist);
+  text-align:left;
+}
+.result-badge.expanded .badge-detail{display:block;}
+.badge-detail-title{
+  font-family:'Fraunces',serif;
+  font-size:16px;font-weight:300;font-style:italic;
+  color:var(--charcoal);margin-bottom:6px;
+}
+.badge-detail-body{
+  font-size:13px;color:var(--stone);
+  line-height:1.7;margin-bottom:10px;
+}
+.badge-detail-traits{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-top:8px;
+}
+.badge-trait{
+  background:rgba(125,155,118,0.1);
+  color:var(--sage-dark);
+  border-radius:100px;
+  padding:4px 11px;
+  font-size:12px;font-weight:500;
+}
+.gad-badge .badge-trait{
+  background:rgba(196,123,90,0.1);
+  color:var(--terra);
+}
+
 .result-cta{width:100%;max-width:340px;background:var(--sage-dark);color:white;border:none;border-radius:16px;padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;}
 .result-cta:hover{background:var(--sage);}
 </style>
@@ -571,7 +629,8 @@ function renderWelcomeCard(index){
   html += `<div class="card-headline">${card.headline}</div>`;
 
   if(card.body){
-    html += `<div class="card-body"></div>`;
+    html += `<div class="card-body">${escH(card.body).replace(/\n/g,'<br>').replace(/&lt;strong&gt;/g,'<strong>').replace(/&lt;\/strong&gt;/g,'</strong>').replace(/&lt;em&gt;/g,'<em>').replace(/&lt;\/em&gt;/g,'</em>')}</div>`;
+    // simpler: just use raw since we control the data
   }
   if(card.list){
     html += '<div class="card-list">';
@@ -591,14 +650,17 @@ function renderWelcomeCard(index){
 
   el.innerHTML = html;
 
+  // fix body html (we need raw html for em/strong in body)
   if(card.body){
     el.querySelector('.card-body').innerHTML = card.body.replace(/\n/g,'<br>');
   }
 
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.className='q-card center'; }));
 
+  // update dots
   document.querySelectorAll('#w-dots .w-dot').forEach((d,i)=>d.classList.toggle('active',i===index));
 
+  // update progress
   setProgress(14 + Math.round((index/welcomeCards.length)*10));
 }
 
@@ -835,11 +897,69 @@ function calcVark(){
 
 function calcGad(){
   let total=0;Object.values(S.gadAnswers).forEach(v=>total+=v);S.gadScore=total;
-  if(total<=4)return{label:'Minimal anxiety',msg:"You're starting from a calm baseline — this program will help you build on that. 💚",color:'var(--sage-dark)'};
-  if(total<=9)return{label:'Mild anxiety',msg:"Mild anxiety is really common, and you're already doing something about it. 💚",color:'#B8963A'};
-  if(total<=14)return{label:'Moderate anxiety',msg:"That took courage to share. This is exactly what this program is designed for. You're in the right place. 💚",color:'var(--terra)'};
-  return{label:'Significant anxiety',msg:"Thank you for trusting me with that. We'll take this one session at a time. And if things ever feel too heavy, please reach out to someone you trust or a professional alongside this. 💚",color:'#A0432A'};
+  if(total<=4)return{label:'Minimal anxiety',level:'minimal',msg:"You're starting from a calm baseline — this program will help you build on that. 💚",color:'var(--sage-dark)'};
+  if(total<=9)return{label:'Mild anxiety',level:'mild',msg:"Mild anxiety is really common, and you're already doing something about it. 💚",color:'#B8963A'};
+  if(total<=14)return{label:'Moderate anxiety',level:'moderate',msg:"That took courage to share. This is exactly what this program is designed for. You're in the right place. 💚",color:'var(--terra)'};
+  return{label:'Significant anxiety',level:'severe',msg:"Thank you for trusting me with that. We'll take this one session at a time. And if things ever feel too heavy, please reach out to someone you trust or a professional alongside this. 💚",color:'#A0432A'};
 }
+
+const varkDetails = {
+  visual: {
+    emoji:'🎨', label:'Visual learner',
+    title:'You think in pictures.',
+    body:"You take in information best through images, diagrams, metaphors, and visual frameworks. You probably remember things better when you can picture them — and you tend to understand concepts by seeing how they connect spatially.",
+    scotty:"Scotty will use vivid metaphors, described mental images, and visual frameworks to explain every CBT concept. Your sessions will be rich with imagery.",
+    traits:['Metaphors','Diagrams','Patterns','Visual frameworks','Mind maps'],
+  },
+  auditory: {
+    emoji:'🎵', label:'Auditory learner',
+    title:'You learn through conversation.',
+    body:"Talking things through — out loud, with someone, or even to yourself — is how ideas click for you. You retain things better when you hear them explained, and you process by discussing.",
+    scotty:"Scotty will use a conversational, rhythmic style. He'll explain concepts like he's talking to you directly, repeat key ideas for emphasis, and invite you to talk things through rather than just read.",
+    traits:['Conversation','Rhythm','Repetition','Discussion','Verbal processing'],
+  },
+  reading_writing: {
+    emoji:'📖', label:'Reading/Writing learner',
+    title:'You love words.',
+    body:"Dense, well-structured text is where you thrive. You retain information through writing, re-reading, and building detailed notes. You appreciate precision in language and like to go deep.",
+    scotty:"Scotty will give you rich structured explanations, detailed journal prompts with follow-up questions, and clear frameworks you can revisit. Your sessions will have depth and substance.",
+    traits:['Structured text','Deep journaling','Definitions','Frameworks','Note-taking'],
+  },
+  kinesthetic: {
+    emoji:'🏃', label:'Kinesthetic learner',
+    title:'You learn by doing.',
+    body:"Action first, theory second. You understand things by trying them, experimenting, and feeling how they work in your body. You get restless with too much theory before getting to do something.",
+    scotty:"Scotty will lead every session with the exercise or challenge first — then explain why it works. Sessions will be body-forward, action-oriented, and built around doing before understanding.",
+    traits:['Action first','Body-based','Experiments','Movement','Real situations'],
+  },
+};
+
+const gadDetails = {
+  minimal: {
+    emoji:'🟢', label:'Minimal anxiety', score:'0–4',
+    title:'Starting from a calm place.',
+    body:"A score of 0–4 on the GAD-7 indicates minimal anxiety. This is a healthy baseline. The Social Anxiety Reset will help you build on this foundation — strengthening your social confidence and giving you tools for the moments anxiety does show up.",
+    traits:['Low baseline','Good foundation','Building skills','Prevention-focused'],
+  },
+  mild: {
+    emoji:'🟡', label:'Mild anxiety', score:'5–9',
+    title:'Manageable, but it\'s there.',
+    body:"A score of 5–9 indicates mild anxiety. You're likely aware of it in social situations but still functioning well. This is the sweet spot for CBT — early enough to make real change before patterns get more entrenched.",
+    traits:['Noticeable patterns','High treatability','CBT works well here','Good prognosis'],
+  },
+  moderate: {
+    emoji:'🟠', label:'Moderate anxiety', score:'10–14',
+    title:'Real, and really treatable.',
+    body:"A score of 10–14 indicates moderate anxiety. This is one of the most common presentations of social anxiety — and one of the best-researched for CBT outcomes. You're exactly who this program is designed for.",
+    traits:['Common presentation','Strong CBT evidence','Real daily impact','Highly treatable'],
+  },
+  severe: {
+    emoji:'🔴', label:'Significant anxiety', score:'15–21',
+    title:'You\'re carrying a lot. That\'s okay.',
+    body:"A score of 15–21 indicates significant anxiety. This takes real courage to acknowledge. CBT has strong evidence for this level too — and this program is a meaningful step. We'd also gently encourage you to consider speaking with a professional alongside Scotty.",
+    traits:['Significant impact','Courage to show up','CBT is effective','Consider extra support'],
+  },
+};
 
 function showResult(){
   const varkLabel=calcVark();
@@ -848,10 +968,50 @@ function showResult(){
   setLabel('All done');
   document.getElementById('result-name').textContent=S.userName||'friend';
   document.getElementById('result-sub').textContent=gad.msg;
+
+  const vd = varkDetails[S.learningStyle] || varkDetails.visual;
+  const gd = gadDetails[gad.level] || gadDetails.mild;
+
   document.getElementById('result-badges').innerHTML=`
-    <div class="result-badge">🧠 ${varkLabel}</div>
-    <div class="result-badge" style="color:${gad.color}">📊 ${gad.label}</div>`;
+    <div class="result-badge" id="vark-badge" onclick="toggleBadge('vark-badge')">
+      <div class="badge-summary">
+        ${vd.emoji} ${vd.label}
+        <span class="badge-chevron">▾</span>
+      </div>
+      <div class="badge-detail">
+        <div class="badge-detail-title">${vd.title}</div>
+        <div class="badge-detail-body">${vd.body}</div>
+        <div class="badge-detail-body" style="color:var(--sage-dark);font-size:12px;"><strong>How Scotty shows up for you:</strong> ${vd.scotty}</div>
+        <div class="badge-detail-traits">
+          ${vd.traits.map(t=>`<span class="badge-trait">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="result-badge gad-badge" id="gad-badge" onclick="toggleBadge('gad-badge')">
+      <div class="badge-summary">
+        ${gd.emoji} ${gd.label} &nbsp;<span style="color:var(--stone);font-size:11px;">GAD-7 score ${S.gadScore}/21</span>
+        <span class="badge-chevron">▾</span>
+      </div>
+      <div class="badge-detail">
+        <div class="badge-detail-title">${gd.title}</div>
+        <div class="badge-detail-body">${gd.body}</div>
+        <div class="badge-detail-traits">
+          ${gd.traits.map(t=>`<span class="badge-trait">${t}</span>`).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--stone);margin-top:8px;">We'll check in again at session 5 and session 10 to track your progress.</div>
+      </div>
+    </div>`;
+
   showScreen('result');
+}
+
+function toggleBadge(id){
+  const el=document.getElementById(id);
+  const wasOpen=el.classList.contains('expanded');
+  // close all
+  document.querySelectorAll('.result-badge').forEach(b=>b.classList.remove('expanded'));
+  // open if it wasn't open
+  if(!wasOpen) el.classList.add('expanded');
 }
 
 async function finishOnboarding(){
