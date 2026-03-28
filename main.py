@@ -7,6 +7,7 @@ import os
 import re
 import json
 import asyncio
+import secrets
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify, session, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -52,6 +53,7 @@ def init_db():
             room_config TEXT DEFAULT '{}',
             avatar_config TEXT DEFAULT '{}',
             gad7_baseline INTEGER DEFAULT NULL,
+            auth_token TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -105,11 +107,21 @@ def init_db():
 # ── Helpers ────────────────────────────────────────────
 
 def get_current_user():
-    """Get logged-in user from session"""
-    if 'user_id' not in session:
+    """Get logged-in user — checks Bearer token first, then falls back to session cookie"""
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        if token:
+            db = get_db()
+            user = db.execute('SELECT * FROM users WHERE auth_token = ?', (token,)).fetchone()
+            db.close()
+            if user:
+                return user
+    user_id = session.get('user_id')
+    if not user_id:
         return None
     db = get_db()
-    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
     db.close()
     return user
 
@@ -260,8 +272,11 @@ def register():
         )
         db.commit()
         user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        token = secrets.token_hex(32)
+        db.execute('UPDATE users SET auth_token = ? WHERE id = ?', (token, user['id']))
+        db.commit()
         session['user_id'] = user['id']
-        return jsonify({'success': True, 'user': {'name': user['name'], 'email': user['email']}})
+        return jsonify({'success': True, 'token': token, 'user': {'name': user['name'], 'email': user['email']}})
     except sqlite3.IntegrityError:
         return jsonify({'error': 'An account with this email already exists'}), 409
     finally:
@@ -281,11 +296,17 @@ def login():
     if not user or not check_password_hash(user['password_hash'], password):
         return jsonify({'error': 'Invalid email or password'}), 401
 
+    token = secrets.token_hex(32)
+    db2 = get_db()
+    db2.execute('UPDATE users SET auth_token = ? WHERE id = ?', (token, user['id']))
+    db2.commit()
+    db2.close()
     session['user_id'] = user['id']
     learning_style = user['learning_style']
     onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
     return jsonify({
         'success': True,
+        'token': token,
         'user': {
             'name': user['name'],
             'email': user['email'],
@@ -298,6 +319,12 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
+    user = get_current_user()
+    if user:
+        db = get_db()
+        db.execute('UPDATE users SET auth_token = NULL WHERE id = ?', (user['id'],))
+        db.commit()
+        db.close()
     session.clear()
     return jsonify({'success': True})
 
@@ -671,17 +698,11 @@ def get_room():
 
 @app.route('/')
 def index():
-    user = get_current_user()
-    if user:
-        learning_style = user['learning_style']
-        onboarded = learning_style is not None and learning_style != '' and learning_style != 'null'
-        if not onboarded:
-            return render_template('onboarding.html')
     return render_template('index.html')
 
 @app.route('/onboarding')
 def onboarding():
-    return index()
+    return render_template('onboarding.html')
 
 
 # ── Run ────────────────────────────────────────────────
