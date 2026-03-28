@@ -40,7 +40,7 @@ def init_db():
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             name TEXT,
-            learning_style TEXT DEFAULT 'visual',
+            learning_style TEXT DEFAULT NULL,
             pace TEXT DEFAULT 'daily',
             current_session INTEGER DEFAULT 1,
             stripe_customer_id TEXT,
